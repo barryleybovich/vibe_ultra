@@ -1,0 +1,352 @@
+import React from 'react';
+import { TrendingUp, Zap, Target } from 'lucide-react';
+
+interface WorkoutDay {
+  day: string;
+  training: string;
+  description: string;
+  tss: number;
+  fitness: number;
+  fatigue: number;
+  form: number;
+}
+
+interface TrainingWeek {
+  weekNumber: string;
+  weekOf: string;
+  weeklyTotal: string;
+  totalTSS: number;
+  workouts: WorkoutDay[];
+}
+
+interface TrainingPlanParserProps {
+  data: any[];
+  initialFitness: number;
+  initialFatigue: number;
+}
+
+export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, initialFitness, initialFatigue }) => {
+  const estimateTSS = (training: string, description: string): number => {
+    // Handle rest days and travel
+    if (training.toLowerCase() === 'rest' || training.toLowerCase().includes('travel')) {
+      return 0;
+    }
+    
+    // Handle cross-training (estimate as moderate effort)
+    if (training.toLowerCase().includes('x-train') || training.toLowerCase() === 'x-train') {
+      return 22.5; // Cross-training session
+    }
+    
+    // Handle numeric mileage
+    const miles = parseFloat(training);
+    if (!isNaN(miles) && miles > 0) {
+      const desc = description.toLowerCase();
+      
+      // Determine intensity based on description keywords
+      const hardKeywords = ['hard', 'threshold', 'tempo', '10k', '5k', 'vo2', 'fast', 'hills', 'ladder'];
+      const moderateKeywords = ['aerobic', 'hm effort', 'race pace', 'fartlek'];
+      
+      const isHard = hardKeywords.some(keyword => desc.includes(keyword));
+      const isModerate = moderateKeywords.some(keyword => desc.includes(keyword)) && !isHard;
+      
+      // Special handling for mixed workouts (warmup/cooldown + intervals)
+      if (desc.includes('up,') || desc.includes('down') || desc.includes('easy,')) {
+        // Mixed workout - assume 30% easy, 70% at target intensity
+        if (isHard) {
+          return Math.round(miles * 0.3 * 8 + miles * 0.7 * 11);
+        } else if (isModerate) {
+          return Math.round(miles * 0.3 * 8 + miles * 0.7 * 9.5);
+        }
+      }
+      
+      // Calculate TSS based on intensity
+      if (isHard) {
+        return Math.round(miles * 11);
+      } else if (isModerate) {
+        return Math.round(miles * 9.5);
+      } else {
+        // Default to easy
+        return Math.round(miles * 8);
+      }
+    }
+    
+    // Handle special cases like races
+    if (description.toLowerCase().includes('50k')) {
+      return 350; // Estimate for 50K race
+    }
+    if (description.toLowerCase().includes('100k')) {
+      return 600; // Estimate for 100K race
+    }
+    
+    return 0;
+  };
+
+  const calculateFitnessMetrics = () => {
+    const allDays: Array<{
+      date: Date;
+      tss: number;
+      fitness: number;
+      fatigue: number;
+      form: number;
+    }> = [];
+    
+    let currentFitness = initialFitness;
+    let currentFatigue = initialFatigue;
+    
+    // Process each week
+    for (let i = 0; i < data.length; i += 2) {
+      const weekRow = data[i];
+      const descriptionRow = data[i + 1];
+      
+      if (!weekRow || !descriptionRow) continue;
+      
+      // Parse week start date
+      const weekOfStr = weekRow['Week of'] || '';
+      const weekStartDate = new Date(weekOfStr);
+      
+      if (isNaN(weekStartDate.getTime())) continue;
+      
+      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      
+      days.forEach((day, dayIndex) => {
+        const training = weekRow[day] || '';
+        const description = descriptionRow[day] || '';
+        const tss = estimateTSS(training, description);
+        
+        // Calculate date for this day
+        const dayDate = new Date(weekStartDate);
+        dayDate.setDate(weekStartDate.getDate() + dayIndex);
+        
+        // Update fitness and fatigue using exponential moving averages
+        // Fitness: 42-day EMA (alpha = 2/(42+1) ≈ 0.047)
+        // Fatigue: 7-day EMA (alpha = 2/(7+1) = 0.25)
+        const fitnessAlpha = 2 / (42 + 1);
+        const fatigueAlpha = 2 / (7 + 1);
+        
+        currentFitness = currentFitness + fitnessAlpha * (tss - currentFitness);
+        currentFatigue = currentFatigue + fatigueAlpha * (tss - currentFatigue);
+        
+        const form = currentFatigue > 0 ? currentFitness / currentFatigue : 0;
+        
+        allDays.push({
+          date: dayDate,
+          tss,
+          fitness: currentFitness,
+          fatigue: currentFatigue,
+          form
+        });
+      });
+    }
+    
+    return allDays;
+  };
+  const parseTrainingPlan = (): TrainingWeek[] => {
+    const fitnessData = calculateFitnessMetrics();
+    let dayIndex = 0;
+    
+    const weeks: TrainingWeek[] = [];
+    
+    for (let i = 0; i < data.length; i += 2) {
+      const weekRow = data[i];
+      const descriptionRow = data[i + 1];
+      
+      if (!weekRow || !descriptionRow) continue;
+      
+      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      const workouts: WorkoutDay[] = [];
+      let weeklyTSS = 0;
+      
+      days.forEach(day => {
+        const training = weekRow[day] || '';
+        const description = descriptionRow[day] || '';
+        const tss = estimateTSS(training, description);
+        const dayData = fitnessData[dayIndex] || { fitness: 0, fatigue: 0, form: 0 };
+        weeklyTSS += tss;
+        dayIndex++;
+        
+        if (training || description) {
+          workouts.push({
+            day,
+            training,
+            description,
+            tss,
+            fitness: dayData.fitness,
+            fatigue: dayData.fatigue,
+            form: dayData.form
+          });
+        } else {
+          // Include empty days for fitness tracking
+          workouts.push({
+            day,
+            training: '',
+            description: '',
+            tss: 0,
+            fitness: dayData.fitness,
+            fatigue: dayData.fatigue,
+            form: dayData.form
+          });
+        }
+      });
+      
+      weeks.push({
+        weekNumber: weekRow['Week #'] || '',
+        weekOf: weekRow['Week of'] || '',
+        weeklyTotal: weekRow['Weekly Total'] || '',
+        totalTSS: weeklyTSS,
+        workouts
+      });
+    }
+    
+    return weeks;
+  };
+
+  const weeks = parseTrainingPlan();
+  
+  const getTrainingTypeColor = (training: string): string => {
+    if (training.toLowerCase().includes('x-train') || training.toLowerCase() === 'x-train') {
+      return 'bg-purple-100 text-purple-800 border-purple-200';
+    }
+    if (training.toLowerCase() === 'rest') {
+      return 'bg-gray-100 text-gray-600 border-gray-200';
+    }
+    if (training.toLowerCase().includes('travel')) {
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    }
+    if (isNaN(Number(training))) {
+      return 'bg-green-100 text-green-800 border-green-200';
+    }
+    return 'bg-blue-100 text-blue-800 border-blue-200';
+  };
+
+  if (weeks.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No training data found. Please check your file format.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Training Plan Overview</h2>
+        <p className="text-gray-600">
+          {weeks.length} week{weeks.length !== 1 ? 's' : ''} of ultramarathon training
+        </p>
+      </div>
+      
+      {weeks.map((week, index) => (
+        <div key={index} className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-bold">{week.weekNumber}</h3>
+                <p className="text-blue-100">{week.weekOf}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold">{week.weeklyTotal}</p>
+                <p className="text-blue-100 text-sm">Total Miles</p>
+                <p className="text-xl font-semibold mt-1">{week.totalTSS}</p>
+                <p className="text-blue-100 text-sm">TSS</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="p-4">
+            <div className="grid grid-cols-7 gap-2 md:gap-4">
+              {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(dayName => {
+                const workout = week.workouts.find(w => w.day === dayName);
+                const isLowForm = workout && workout.form < 0.75;
+                return (
+                  <div key={dayName} className="min-h-[80px]">
+                    <div className="text-center mb-2">
+                      <h4 className="font-semibold text-gray-900 text-sm md:text-base">{dayName}</h4>
+                    </div>
+                    {workout ? (
+                      <div className={`border rounded-lg p-2 md:p-3 hover:shadow-md transition-shadow duration-200 h-full ${
+                        isLowForm ? 'bg-red-50 border-red-200' : ''
+                      }`}>
+                        <div className="text-center mb-2">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getTrainingTypeColor(workout.training)}`}>
+                            {workout.training}
+                          </span>
+                          <div className="mt-1 space-y-1">
+                            {workout.tss > 0 && (
+                              <span className="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-700 rounded">
+                                {workout.tss} TSS
+                              </span>
+                            )}
+                            <div className="flex flex-col space-y-0.5">
+                              <div className="flex items-center justify-center space-x-1">
+                                <TrendingUp className="w-3 h-3 text-green-600" />
+                                <span className="text-xs text-green-700 font-medium">
+                                  {workout.fitness.toFixed(0)}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-center space-x-1">
+                                <Zap className="w-3 h-3 text-red-600" />
+                                <span className="text-xs text-red-700 font-medium">
+                                  {workout.fatigue.toFixed(0)}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-center space-x-1">
+                                <Target className="w-3 h-3 text-blue-600" />
+                                <span className={`text-xs font-medium ${
+                                  isLowForm ? 'text-red-700' : 'text-blue-700'
+                                }`}>
+                                  {workout.form.toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {workout.description && (
+                          <p className="text-xs md:text-sm text-gray-600 leading-relaxed text-center">
+                            {workout.description}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className={`border rounded-lg p-2 md:p-3 h-full ${
+                        isLowForm ? 'bg-red-50 border-red-200' : 'bg-gray-50'
+                      }`}>
+                        <div className="text-center">
+                          <span className="px-2 py-1 text-xs font-medium rounded-full border bg-gray-100 text-gray-500">
+                            -
+                          </span>
+                          <div className="mt-1 space-y-0.5">
+                            <div className="flex items-center justify-center space-x-1">
+                              <TrendingUp className="w-3 h-3 text-green-600" />
+                              <span className="text-xs text-green-700 font-medium">
+                                {(week.workouts.find(w => w.day === dayName)?.fitness || 0).toFixed(0)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-center space-x-1">
+                              <Zap className="w-3 h-3 text-red-600" />
+                              <span className="text-xs text-red-700 font-medium">
+                                {(week.workouts.find(w => w.day === dayName)?.fatigue || 0).toFixed(0)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-center space-x-1">
+                              <Target className="w-3 h-3 text-blue-600" />
+                              <span className={`text-xs font-medium ${
+                                isLowForm ? 'text-red-700' : 'text-blue-700'
+                              }`}>
+                                {(week.workouts.find(w => w.day === dayName)?.form || 0).toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
