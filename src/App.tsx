@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { FileUploader } from './components/FileUploader';
 import { FitnessInitializer } from './components/FitnessInitializer';
 import { TodaysWorkout } from './components/TodaysWorkout';
@@ -7,12 +8,73 @@ import { TrainingStats } from './components/TrainingStats';
 import { FitnessChart } from './components/FitnessChart';
 import { Mountain, AlertCircle } from 'lucide-react';
 
+const STORAGE_KEYS = {
+  TRAINING_DATA: 'ultramarathon_training_data',
+  FITNESS_INITIALIZED: 'ultramarathon_fitness_initialized',
+  INITIAL_FITNESS: 'ultramarathon_initial_fitness',
+  INITIAL_FATIGUE: 'ultramarathon_initial_fatigue'
+};
+
 function App() {
   const [trainingData, setTrainingData] = useState<any[]>([]);
   const [fitnessInitialized, setFitnessInitialized] = useState(false);
   const [initialFitness, setInitialFitness] = useState(50);
   const [initialFatigue, setInitialFatigue] = useState(30);
   const [error, setError] = useState<string>('');
+
+  // Load data from localStorage on component mount
+  useEffect(() => {
+    try {
+      const savedTrainingData = localStorage.getItem(STORAGE_KEYS.TRAINING_DATA);
+      const savedFitnessInitialized = localStorage.getItem(STORAGE_KEYS.FITNESS_INITIALIZED);
+      const savedInitialFitness = localStorage.getItem(STORAGE_KEYS.INITIAL_FITNESS);
+      const savedInitialFatigue = localStorage.getItem(STORAGE_KEYS.INITIAL_FATIGUE);
+
+      if (savedTrainingData) {
+        const parsedData = JSON.parse(savedTrainingData);
+        setTrainingData(parsedData);
+      }
+
+      if (savedFitnessInitialized === 'true') {
+        setFitnessInitialized(true);
+      }
+
+      if (savedInitialFitness) {
+        setInitialFitness(parseFloat(savedInitialFitness));
+      }
+
+      if (savedInitialFatigue) {
+        setInitialFatigue(parseFloat(savedInitialFatigue));
+      }
+    } catch (error) {
+      console.error('Error loading saved data:', error);
+      // Clear corrupted data
+      localStorage.removeItem(STORAGE_KEYS.TRAINING_DATA);
+      localStorage.removeItem(STORAGE_KEYS.FITNESS_INITIALIZED);
+      localStorage.removeItem(STORAGE_KEYS.INITIAL_FITNESS);
+      localStorage.removeItem(STORAGE_KEYS.INITIAL_FATIGUE);
+    }
+  }, []);
+
+  // Save training data to localStorage whenever it changes
+  useEffect(() => {
+    if (trainingData.length > 0) {
+      localStorage.setItem(STORAGE_KEYS.TRAINING_DATA, JSON.stringify(trainingData));
+    }
+  }, [trainingData]);
+
+  // Save fitness settings to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.FITNESS_INITIALIZED, fitnessInitialized.toString());
+  }, [fitnessInitialized]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.INITIAL_FITNESS, initialFitness.toString());
+  }, [initialFitness]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.INITIAL_FATIGUE, initialFatigue.toString());
+  }, [initialFatigue]);
 
   const handleDataParsed = (data: any[]) => {
     setTrainingData(data);
@@ -30,6 +92,11 @@ function App() {
     setTrainingData([]);
     setFitnessInitialized(false);
     setError('');
+    // Clear localStorage when resetting
+    localStorage.removeItem(STORAGE_KEYS.TRAINING_DATA);
+    localStorage.removeItem(STORAGE_KEYS.FITNESS_INITIALIZED);
+    localStorage.removeItem(STORAGE_KEYS.INITIAL_FITNESS);
+    localStorage.removeItem(STORAGE_KEYS.INITIAL_FATIGUE);
   };
 
   const handleFitnessInitialize = (fitness: number, fatigue: number) => {
