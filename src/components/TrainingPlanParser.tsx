@@ -118,13 +118,13 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, in
         dayDate.setDate(weekStartDate.getDate() + dayIndex);
         
         // Update fitness and fatigue using exponential moving averages
-        // Fitness: 42-day EMA (alpha = 2/(42+1) ≈ 0.047)
-        // Fatigue: 7-day EMA (alpha = 2/(7+1) = 0.25)
-        const fitnessAlpha = 2 / (42 + 1);
-        const fatigueAlpha = 2 / (7 + 1);
+        // Fitness: 42-day EMA (e^(-1/42))
+        // Fatigue: 7-day EMA (e^(-1/7))
+        const fitnessAlpha = 0.976472;
+        const fatigueAlpha = 0.866878;
         
-        currentFitness = currentFitness + fitnessAlpha * (tss - currentFitness);
-        currentFatigue = currentFatigue + fatigueAlpha * (tss - currentFatigue);
+        currentFitness = currentFitness * fitnessAlpha + tss * (1 - fitnessAlpha);
+        currentFatigue = currentFatigue * fatigueAlpha + tss * (1 - fatigueAlpha);
         
         const form = currentFatigue > 0 ? currentFitness / currentFatigue : 0;
         
