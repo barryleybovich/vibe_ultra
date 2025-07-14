@@ -80,7 +80,7 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
               step="0.1"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Usually lower than fitness (recent training load)
+              Usually higher than fitness (recent training load)
             </p>
           </div>
         </div>
