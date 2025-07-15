@@ -6,9 +6,16 @@ interface TodaysWorkoutProps {
   planStartDate: Date;
   initialFitness: number;
   initialFatigue: number;
+  actualTSSData: Record<string, number>;
 }
 
-export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({ data, planStartDate, initialFitness, initialFatigue }) => {
+export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({ 
+  data, 
+  planStartDate, 
+  initialFitness, 
+  initialFatigue, 
+  actualTSSData 
+}) => {
   const estimateTSS = (training: string, description: string): number => {
     if (training.toLowerCase() === 'rest' || training.toLowerCase().includes('travel')) {
       return 0;
@@ -84,14 +91,17 @@ export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({ data, planStartDat
         
         const training = weekRow[day] || '';
         const description = descriptionRow[day] || '';
-        const tss = estimateTSS(training, description);
+        const plannedTSS = estimateTSS(training, description);
+        const workoutKey = `${weekIndex}-${dayIndex}`;
+        const actualTSS = actualTSSData[workoutKey];
+        const effectiveTSS = actualTSS ?? plannedTSS;
         
         // Update fitness metrics
         const fitnessAlpha = 2 / (42 + 1);
         const fatigueAlpha = 2 / (7 + 1);
         
-        currentFitness = currentFitness + fitnessAlpha * (tss - currentFitness);
-        currentFatigue = currentFatigue + fatigueAlpha * (tss - currentFatigue);
+        currentFitness = currentFitness + fitnessAlpha * (effectiveTSS - currentFitness);
+        currentFatigue = currentFatigue + fatigueAlpha * (effectiveTSS - currentFatigue);
         
         const form = currentFatigue > 0 ? currentFitness / currentFatigue : 0;
         
@@ -102,7 +112,9 @@ export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({ data, planStartDat
             date: dayDate,
             training,
             description,
-            tss,
+            plannedTSS,
+            actualTSS,
+            effectiveTSS,
             fitness: currentFitness,
             fatigue: currentFatigue,
             form,
@@ -218,12 +230,25 @@ export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({ data, planStartDat
               </span>
             </div>
             
-            {todaysWorkout.tss > 0 && (
+            {(todaysWorkout.plannedTSS > 0 || todaysWorkout.actualTSS !== undefined) && (
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">TSS:</span>
-                <span className="px-2 py-1 text-sm bg-gray-100 text-gray-700 rounded font-medium">
-                  {todaysWorkout.tss}
-                </span>
+                <div className="space-y-1">
+                  {todaysWorkout.actualTSS !== undefined ? (
+                    <>
+                      <span className="px-2 py-1 text-sm bg-gray-100 text-gray-500 rounded font-medium line-through block">
+                        {todaysWorkout.plannedTSS}
+                      </span>
+                      <span className="px-2 py-1 text-sm bg-green-100 text-green-700 rounded font-medium block">
+                        {todaysWorkout.actualTSS}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="px-2 py-1 text-sm bg-gray-100 text-gray-700 rounded font-medium">
+                      {todaysWorkout.plannedTSS}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
             

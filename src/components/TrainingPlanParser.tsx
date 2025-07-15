@@ -1,5 +1,7 @@
 import React from 'react';
+import { useState } from 'react';
 import { TrendingUp, Zap, Target } from 'lucide-react';
+import { WorkoutModal } from './WorkoutModal';
 
 interface WorkoutDay {
   day: string;
@@ -24,9 +26,25 @@ interface TrainingPlanParserProps {
   planStartDate: Date;
   initialFitness: number;
   initialFatigue: number;
+  actualTSSData: Record<string, number>;
+  onActualTSSUpdate: (workoutKey: string, actualTSS: number | null) => void;
 }
 
-export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, planStartDate, initialFitness, initialFatigue }) => {
+export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ 
+  data, 
+  planStartDate, 
+  initialFitness, 
+  initialFatigue, 
+  actualTSSData, 
+  onActualTSSUpdate 
+}) => {
+  const [selectedWorkout, setSelectedWorkout] = useState<{
+    workout: WorkoutDay & { plannedTSS: number; actualTSS?: number };
+    weekNumber: string;
+    weekOf: string;
+    workoutKey: string;
+  } | null>(null);
+
   const estimateTSS = (training: string, description: string): number => {
     // Handle rest days and travel
     if (training.toLowerCase() === 'rest' || training.toLowerCase().includes('travel')) {
@@ -85,7 +103,9 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, pl
   const calculateFitnessMetrics = () => {
     const allDays: Array<{
       date: Date;
-      tss: number;
+      plannedTSS: number;
+      actualTSS?: number;
+      effectiveTSS: number;
       fitness: number;
       fatigue: number;
       form: number;
@@ -111,7 +131,10 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, pl
       days.forEach((day, dayIndex) => {
         const training = weekRow[day] || '';
         const description = descriptionRow[day] || '';
-        const tss = estimateTSS(training, description);
+        const plannedTSS = estimateTSS(training, description);
+        const workoutKey = `${weekIndex}-${dayIndex}`;
+        const actualTSS = actualTSSData[workoutKey];
+        const effectiveTSS = actualTSS ?? plannedTSS;
         
         // Calculate date for this day
         const dayDate = new Date(weekStartDate);
@@ -123,14 +146,16 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, pl
         const fitnessAlpha = 0.976472;
         const fatigueAlpha = 0.866878;
         
-        currentFitness = currentFitness * fitnessAlpha + tss * (1 - fitnessAlpha);
-        currentFatigue = currentFatigue * fatigueAlpha + tss * (1 - fatigueAlpha);
+        currentFitness = currentFitness * fitnessAlpha + effectiveTSS * (1 - fitnessAlpha);
+        currentFatigue = currentFatigue * fatigueAlpha + effectiveTSS * (1 - fatigueAlpha);
         
         const form = currentFatigue > 0 ? currentFitness / currentFatigue : 0;
         
         allDays.push({
           date: dayDate,
-          tss,
+          plannedTSS,
+          actualTSS,
+          effectiveTSS,
           fitness: currentFitness,
           fatigue: currentFatigue,
           form
@@ -165,9 +190,12 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, pl
       days.forEach(day => {
         const training = weekRow[day] || '';
         const description = descriptionRow[day] || '';
-        const tss = estimateTSS(training, description);
+        const plannedTSS = estimateTSS(training, description);
+        const workoutKey = `${weekIndex}-${dayIndex}`;
+        const actualTSS = actualTSSData[workoutKey];
+        const effectiveTSS = actualTSS ?? plannedTSS;
         const dayData = fitnessData[dayIndex] || { fitness: 0, fatigue: 0, form: 0 };
-        weeklyTSS += tss;
+        weeklyTSS += effectiveTSS;
         dayIndex++;
         
         if (training || description) {
@@ -175,7 +203,7 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, pl
             day,
             training,
             description,
-            tss,
+            tss: effectiveTSS,
             fitness: dayData.fitness,
             fatigue: dayData.fatigue,
             form: dayData.form
@@ -186,7 +214,7 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, pl
             day,
             training: '',
             description: '',
-            tss: 0,
+            tss: effectiveTSS,
             fitness: dayData.fitness,
             fatigue: dayData.fatigue,
             form: dayData.form
@@ -228,6 +256,29 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, pl
     return 'bg-blue-100 text-blue-800 border-blue-200';
   };
 
+  const handleWorkoutClick = (workout: WorkoutDay, weekNumber: string, weekOf: string, weekIndex: number, dayIndex: number) => {
+    const workoutKey = `${weekIndex}-${dayIndex}`;
+    const plannedTSS = estimateTSS(workout.training, workout.description);
+    const actualTSS = actualTSSData[workoutKey];
+    
+    setSelectedWorkout({
+      workout: {
+        ...workout,
+        plannedTSS,
+        actualTSS
+      },
+      weekNumber,
+      weekOf,
+      workoutKey
+    });
+  };
+
+  const handleSaveActualTSS = (actualTSS: number | null) => {
+    if (selectedWorkout) {
+      onActualTSSUpdate(selectedWorkout.workoutKey, actualTSS);
+    }
+  };
+
   if (weeks.length === 0) {
     return (
       <div className="text-center py-8">
@@ -237,6 +288,18 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, pl
   }
 
   return (
+    <>
+      {selectedWorkout && (
+        <WorkoutModal
+          isOpen={true}
+          onClose={() => setSelectedWorkout(null)}
+          workout={selectedWorkout.workout}
+          weekNumber={selectedWorkout.weekNumber}
+          weekOf={selectedWorkout.weekOf}
+          onSaveActualTSS={handleSaveActualTSS}
+        />
+      )}
+      
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Training Plan Overview</h2>
@@ -264,27 +327,47 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, pl
           
           <div className="p-4">
             <div className="grid grid-cols-7 gap-2 md:gap-4">
-              {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(dayName => {
+              {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((dayName, dayIndex) => {
                 const workout = week.workouts.find(w => w.day === dayName);
                 const isLowForm = workout && workout.form < 0.75;
+                const workoutKey = `${index}-${dayIndex}`;
+                const plannedTSS = workout ? estimateTSS(workout.training, workout.description) : 0;
+                const actualTSS = actualTSSData[workoutKey];
+                const hasActualTSS = actualTSS !== undefined;
                 return (
                   <div key={dayName} className="min-h-[80px]">
                     <div className="text-center mb-2">
                       <h4 className="font-semibold text-gray-900 text-sm md:text-base">{dayName}</h4>
                     </div>
                     {workout ? (
-                      <div className={`border rounded-lg p-2 md:p-3 hover:shadow-md transition-shadow duration-200 h-full ${
+                      <div 
+                        className={`border rounded-lg p-2 md:p-3 hover:shadow-md transition-shadow duration-200 h-full cursor-pointer hover:bg-gray-50 ${
                         isLowForm ? 'bg-red-50 border-red-200' : ''
-                      }`}>
+                        }`}
+                        onClick={() => handleWorkoutClick(workout, week.weekNumber, week.weekOf, index, dayIndex)}
+                      >
                         <div className="text-center mb-2">
                           <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getTrainingTypeColor(workout.training)}`}>
                             {workout.training}
                           </span>
                           <div className="mt-1 space-y-1">
-                            {workout.tss > 0 && (
-                              <span className="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-700 rounded">
-                                {workout.tss} TSS
-                              </span>
+                            {(plannedTSS > 0 || hasActualTSS) && (
+                              <div className="space-y-0.5">
+                                {hasActualTSS ? (
+                                  <>
+                                    <span className="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-500 rounded line-through block">
+                                      {plannedTSS} TSS
+                                    </span>
+                                    <span className="px-1.5 py-0.5 text-xs bg-green-100 text-green-700 rounded block">
+                                      {actualTSS} TSS
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-700 rounded">
+                                    {plannedTSS} TSS
+                                  </span>
+                                )}
+                              </div>
                             )}
                             <div className="flex flex-col space-y-0.5">
                               <div className="flex items-center justify-center space-x-1">
@@ -318,9 +401,23 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, pl
                         )}
                       </div>
                     ) : (
-                      <div className={`border rounded-lg p-2 md:p-3 h-full ${
+                      <div 
+                        className={`border rounded-lg p-2 md:p-3 h-full cursor-pointer hover:bg-gray-50 ${
                         isLowForm ? 'bg-red-50 border-red-200' : 'bg-gray-50'
-                      }`}>
+                        }`}
+                        onClick={() => {
+                          const emptyWorkout: WorkoutDay = {
+                            day: dayName,
+                            training: '',
+                            description: '',
+                            tss: 0,
+                            fitness: week.workouts.find(w => w.day === dayName)?.fitness || 0,
+                            fatigue: week.workouts.find(w => w.day === dayName)?.fatigue || 0,
+                            form: week.workouts.find(w => w.day === dayName)?.form || 0
+                          };
+                          handleWorkoutClick(emptyWorkout, week.weekNumber, week.weekOf, index, dayIndex);
+                        }}
+                      >
                         <div className="text-center">
                           <span className="px-2 py-1 text-xs font-medium rounded-full border bg-gray-100 text-gray-500">
                             -
@@ -358,5 +455,6 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, pl
         </div>
       ))}
     </div>
+    </>
   );
 };

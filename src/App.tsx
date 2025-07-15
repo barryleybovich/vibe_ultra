@@ -10,6 +10,7 @@ import { Mountain, AlertCircle } from 'lucide-react';
 
 const STORAGE_KEYS = {
   TRAINING_DATA: 'ultramarathon_training_data',
+  ACTUAL_TSS_DATA: 'ultramarathon_actual_tss_data',
   FITNESS_INITIALIZED: 'ultramarathon_fitness_initialized',
   INITIAL_FITNESS: 'ultramarathon_initial_fitness',
   INITIAL_FATIGUE: 'ultramarathon_initial_fatigue',
@@ -22,6 +23,7 @@ function App() {
   const [fitnessInitialized, setFitnessInitialized] = useState(false);
   const [initialFitness, setInitialFitness] = useState(50);
   const [initialFatigue, setInitialFatigue] = useState(30);
+  const [actualTSSData, setActualTSSData] = useState<Record<string, number>>({});
   const [error, setError] = useState<string>('');
 
   // Load data from localStorage on component mount
@@ -32,6 +34,7 @@ function App() {
       const savedInitialFitness = localStorage.getItem(STORAGE_KEYS.INITIAL_FITNESS);
       const savedInitialFatigue = localStorage.getItem(STORAGE_KEYS.INITIAL_FATIGUE);
       const savedPlanStartDate = localStorage.getItem(STORAGE_KEYS.PLAN_START_DATE);
+      const savedActualTSSData = localStorage.getItem(STORAGE_KEYS.ACTUAL_TSS_DATA);
 
       if (savedTrainingData) {
         const parsedData = JSON.parse(savedTrainingData);
@@ -53,6 +56,10 @@ function App() {
       if (savedPlanStartDate) {
         setPlanStartDate(new Date(savedPlanStartDate));
       }
+
+      if (savedActualTSSData) {
+        setActualTSSData(JSON.parse(savedActualTSSData));
+      }
     } catch (error) {
       console.error('Error loading saved data:', error);
       // Clear corrupted data
@@ -61,6 +68,7 @@ function App() {
       localStorage.removeItem(STORAGE_KEYS.INITIAL_FITNESS);
       localStorage.removeItem(STORAGE_KEYS.INITIAL_FATIGUE);
       localStorage.removeItem(STORAGE_KEYS.PLAN_START_DATE);
+      localStorage.removeItem(STORAGE_KEYS.ACTUAL_TSS_DATA);
     }
   }, []);
 
@@ -89,6 +97,10 @@ function App() {
       localStorage.setItem(STORAGE_KEYS.PLAN_START_DATE, planStartDate.toISOString());
     }
   }, [planStartDate]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.ACTUAL_TSS_DATA, JSON.stringify(actualTSSData));
+  }, [actualTSSData]);
   const handleDataParsed = (data: any[]) => {
     setTrainingData(data);
     setError('');
@@ -106,6 +118,7 @@ function App() {
     setTrainingData([]);
     setPlanStartDate(null);
     setFitnessInitialized(false);
+    setActualTSSData({});
     setError('');
     // Clear localStorage when resetting
     localStorage.removeItem(STORAGE_KEYS.TRAINING_DATA);
@@ -113,6 +126,7 @@ function App() {
     localStorage.removeItem(STORAGE_KEYS.INITIAL_FITNESS);
     localStorage.removeItem(STORAGE_KEYS.INITIAL_FATIGUE);
     localStorage.removeItem(STORAGE_KEYS.PLAN_START_DATE);
+    localStorage.removeItem(STORAGE_KEYS.ACTUAL_TSS_DATA);
   };
 
   const handleFitnessInitialize = (fitness: number, fatigue: number, startDate: Date) => {
@@ -122,6 +136,18 @@ function App() {
     setFitnessInitialized(true);
   };
   const generateChartData = () => {
+  const handleActualTSSUpdate = (workoutKey: string, actualTSS: number | null) => {
+    setActualTSSData(prev => {
+      const updated = { ...prev };
+      if (actualTSS === null) {
+        delete updated[workoutKey];
+      } else {
+        updated[workoutKey] = actualTSS;
+      }
+      return updated;
+    });
+  };
+
     if (!fitnessInitialized || trainingData.length === 0 || !planStartDate) return [];
     
     const chartData: Array<{
@@ -136,7 +162,13 @@ function App() {
     let currentFatigue = initialFatigue;
     
     // Helper function to estimate TSS (duplicate from TrainingPlanParser)
-    const estimateTSS = (training: string, description: string): number => {
+    const estimateTSS = (training: string, description: string, weekIndex: number, dayIndex: number): number => {
+      const workoutKey = `${weekIndex}-${dayIndex}`;
+      const actualTSS = actualTSSData[workoutKey];
+      if (actualTSS !== undefined) {
+        return actualTSS;
+      }
+      
       if (training.toLowerCase() === 'rest' || training.toLowerCase().includes('travel')) {
         return 0;
       }
@@ -197,7 +229,7 @@ function App() {
       days.forEach((day, dayIndex) => {
         const training = weekRow[day] || '';
         const description = descriptionRow[day] || '';
-        const tss = estimateTSS(training, description);
+        const tss = estimateTSS(training, description, weekIndex, dayIndex);
         
         const dayDate = new Date(weekStartDate);
         dayDate.setDate(weekStartDate.getDate() + dayIndex);
@@ -278,6 +310,7 @@ function App() {
                 planStartDate={planStartDate}
                 initialFitness={initialFitness}
                 initialFatigue={initialFatigue}
+                actualTSSData={actualTSSData}
               />
             <TrainingStats data={trainingData} />
               <TrainingPlanParser 
@@ -285,6 +318,8 @@ function App() {
                 planStartDate={planStartDate}
                 initialFitness={initialFitness}
                 initialFatigue={initialFatigue}
+                actualTSSData={actualTSSData}
+                onActualTSSUpdate={handleActualTSSUpdate}
               />
             </div>
           )
