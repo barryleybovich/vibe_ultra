@@ -6,8 +6,8 @@ interface FitnessInitializerProps {
 }
 
 export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitialize }) => {
-  const [fitness, setFitness] = useState<string>('50');
-  const [fatigue, setFatigue] = useState<string>('30');
+  const [fitness, setFitness] = useState<string>('45');
+  const [fatigue, setFatigue] = useState<string>('55');
   const [selectedDate, setSelectedDate] = useState<string>('');
 
   const getNextMonday = () => {
