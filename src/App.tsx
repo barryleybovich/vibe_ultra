@@ -135,7 +135,7 @@ function App() {
     setPlanStartDate(startDate);
     setFitnessInitialized(true);
   };
-  const generateChartData = () => {
+
   const handleActualTSSUpdate = (workoutKey: string, actualTSS: number | null) => {
     setActualTSSData(prev => {
       const updated = { ...prev };
@@ -148,6 +148,7 @@ function App() {
     });
   };
 
+  const generateChartData = () => {
     if (!fitnessInitialized || trainingData.length === 0 || !planStartDate) return [];
     
     const chartData: Array<{
