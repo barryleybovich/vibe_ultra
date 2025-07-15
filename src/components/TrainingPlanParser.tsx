@@ -143,6 +143,7 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, pl
   const parseTrainingPlan = (): TrainingWeek[] => {
     const fitnessData = calculateFitnessMetrics();
     let dayIndex = 0;
+    let weekStartDate: Date;
     
     const weeks: TrainingWeek[] = [];
     
@@ -151,6 +152,11 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, pl
       const descriptionRow = data[i + 1];
       
       if (!weekRow || !descriptionRow) continue;
+      
+      // Calculate week start date based on plan start date and week index
+      const weekIndex = Math.floor(i / 2);
+      weekStartDate = new Date(planStartDate);
+      weekStartDate.setDate(planStartDate.getDate() + (weekIndex * 7));
       
       const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
       const workouts: WorkoutDay[] = [];
