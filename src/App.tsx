@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { FileUploader } from './components/FileUploader';
 import { FitnessInitializer } from './components/FitnessInitializer';
-import { PlanDateSelector } from './components/PlanDateSelector';
 import { TodaysWorkout } from './components/TodaysWorkout';
 import { TrainingPlanParser } from './components/TrainingPlanParser';
 import { TrainingStats } from './components/TrainingStats';
@@ -116,14 +115,11 @@ function App() {
     localStorage.removeItem(STORAGE_KEYS.PLAN_START_DATE);
   };
 
-  const handleFitnessInitialize = (fitness: number, fatigue: number) => {
+  const handleFitnessInitialize = (fitness: number, fatigue: number, startDate: Date) => {
     setInitialFitness(fitness);
     setInitialFatigue(fatigue);
-    setFitnessInitialized(true);
-  };
-
-  const handleDateSelected = (startDate: Date) => {
     setPlanStartDate(startDate);
+    setFitnessInitialized(true);
   };
   const generateChartData = () => {
     if (!fitnessInitialized || trainingData.length === 0 || !planStartDate) return [];
@@ -274,8 +270,6 @@ function App() {
         ) : (
           !fitnessInitialized ? (
             <FitnessInitializer onInitialize={handleFitnessInitialize} />
-          ) : !planStartDate ? (
-            <PlanDateSelector onDateSelected={handleDateSelected} />
           ) : (
             <div className="space-y-8">
               <FitnessChart data={generateChartData()} />

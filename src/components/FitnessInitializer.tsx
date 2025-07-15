@@ -1,19 +1,32 @@
 import React, { useState } from 'react';
-import { TrendingUp, Zap, Target, Info } from 'lucide-react';
+import { TrendingUp, Zap, Target, Info, Calendar } from 'lucide-react';
 
 interface FitnessInitializerProps {
-  onInitialize: (fitness: number, fatigue: number) => void;
+  onInitialize: (fitness: number, fatigue: number, startDate: Date) => void;
 }
 
 export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitialize }) => {
   const [fitness, setFitness] = useState<string>('50');
   const [fatigue, setFatigue] = useState<string>('30');
+  const [selectedDate, setSelectedDate] = useState<string>('');
+
+  const getNextMonday = () => {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek; // If Sunday (0), next Monday is 1 day away
+    const nextMonday = new Date(today);
+    nextMonday.setDate(today.getDate() + daysUntilMonday);
+    return nextMonday.toISOString().split('T')[0];
+  };
+
+  const suggestedDate = getNextMonday();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const fitnessValue = parseFloat(fitness) || 50;
     const fatigueValue = parseFloat(fatigue) || 30;
-    onInitialize(fitnessValue, fatigueValue);
+    const startDate = new Date(selectedDate);
+    onInitialize(fitnessValue, fatigueValue, startDate);
   };
 
   return (
@@ -24,9 +37,9 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
             <TrendingUp className="w-8 h-8 text-blue-600" />
           </div>
         </div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">Initialize Fitness Tracking</h3>
+        <h3 className="text-2xl font-bold text-gray-900 mb-2">Setup Training Plan</h3>
         <p className="text-gray-600">
-          Set your starting fitness and fatigue values to track your training load progression
+          Configure your fitness baseline and plan start date
         </p>
       </div>
 
@@ -39,6 +52,7 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
               <li><strong>Fitness:</strong> 42-day trailing average of daily TSS (chronic training load)</li>
               <li><strong>Fatigue:</strong> 7-day trailing average of daily TSS (acute training load)</li>
               <li><strong>Form:</strong> Fitness ÷ Fatigue ratio (readiness to perform)</li>
+              <li><strong>Start Date:</strong> Training plans should begin on a Monday for proper week alignment</li>
             </ul>
           </div>
         </div>
@@ -85,6 +99,36 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
           </div>
         </div>
 
+        <div>
+          <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+            <Calendar className="w-4 h-4 mr-2 text-blue-600" />
+            Plan Start Date
+          </label>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            required
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Suggested: {new Date(suggestedDate).toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setSelectedDate(suggestedDate)}
+          className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-200 mb-2"
+        >
+          Use Next Monday ({new Date(suggestedDate).toLocaleDateString()})
+        </button>
+
         <div className="bg-gray-50 rounded-lg p-4">
           <h4 className="font-medium text-gray-900 mb-2">Preview Form Score</h4>
           <div className="text-2xl font-bold text-blue-600">
@@ -97,9 +141,10 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
+          disabled={!selectedDate}
+          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
         >
-          Initialize Tracking
+          Start Training Plan
         </button>
       </form>
     </div>
