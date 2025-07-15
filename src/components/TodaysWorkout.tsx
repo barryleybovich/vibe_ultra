@@ -3,11 +3,12 @@ import { Calendar, Clock, TrendingUp, Zap, Target, AlertCircle } from 'lucide-re
 
 interface TodaysWorkoutProps {
   data: any[];
+  planStartDate: Date;
   initialFitness: number;
   initialFatigue: number;
 }
 
-export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({ data, initialFitness, initialFatigue }) => {
+export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({ data, planStartDate, initialFitness, initialFatigue }) => {
   const estimateTSS = (training: string, description: string): number => {
     if (training.toLowerCase() === 'rest' || training.toLowerCase().includes('travel')) {
       return 0;
@@ -68,10 +69,10 @@ export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({ data, initialFitne
       
       if (!weekRow || !descriptionRow) continue;
       
-      const weekOfStr = weekRow['Week of'] || '';
-      const weekStartDate = new Date(weekOfStr);
-      
-      if (isNaN(weekStartDate.getTime())) continue;
+      // Calculate week start date based on plan start date and week index
+      const weekIndex = Math.floor(i / 2);
+      const weekStartDate = new Date(planStartDate);
+      weekStartDate.setDate(planStartDate.getDate() + (weekIndex * 7));
       
       const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
       
@@ -106,33 +107,32 @@ export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({ data, initialFitne
             fatigue: currentFatigue,
             form,
             weekNumber: weekRow['Week #'] || '',
-            weekOf: weekRow['Week of'] || ''
+            weekOf: weekStartDate.toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric' 
+            })
           };
         }
       }
     }
     
     // Check if today is before or after the plan
-    const firstWeekRow = data[0];
-    const lastWeekRow = data[data.length - 2];
+    const planStart = new Date(planStartDate);
+    planStart.setHours(0, 0, 0, 0);
     
-    if (firstWeekRow && firstWeekRow['Week of']) {
-      const planStartDate = new Date(firstWeekRow['Week of']);
-      planStartDate.setHours(0, 0, 0, 0);
-      
-      if (today < planStartDate) {
-        return { found: false, status: 'before' };
-      }
+    if (today < planStart) {
+      return { found: false, status: 'before' };
     }
     
-    if (lastWeekRow && lastWeekRow['Week of']) {
-      const planEndDate = new Date(lastWeekRow['Week of']);
-      planEndDate.setDate(planEndDate.getDate() + 6); // Add 6 days to get to Sunday
-      planEndDate.setHours(0, 0, 0, 0);
-      
-      if (today > planEndDate) {
-        return { found: false, status: 'after' };
-      }
+    // Calculate plan end date
+    const totalWeeks = Math.ceil(data.length / 2);
+    const planEnd = new Date(planStartDate);
+    planEnd.setDate(planStartDate.getDate() + (totalWeeks * 7) - 1); // Last day of last week
+    planEnd.setHours(0, 0, 0, 0);
+    
+    if (today > planEnd) {
+      return { found: false, status: 'after' };
     }
     
     return { found: false, status: 'unknown' };

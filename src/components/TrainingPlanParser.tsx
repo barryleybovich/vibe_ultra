@@ -21,11 +21,12 @@ interface TrainingWeek {
 
 interface TrainingPlanParserProps {
   data: any[];
+  planStartDate: Date;
   initialFitness: number;
   initialFatigue: number;
 }
 
-export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, initialFitness, initialFatigue }) => {
+export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, planStartDate, initialFitness, initialFatigue }) => {
   const estimateTSS = (training: string, description: string): number => {
     // Handle rest days and travel
     if (training.toLowerCase() === 'rest' || training.toLowerCase().includes('travel')) {
@@ -100,11 +101,10 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, in
       
       if (!weekRow || !descriptionRow) continue;
       
-      // Parse week start date
-      const weekOfStr = weekRow['Week of'] || '';
-      const weekStartDate = new Date(weekOfStr);
-      
-      if (isNaN(weekStartDate.getTime())) continue;
+      // Calculate week start date based on plan start date and week index
+      const weekIndex = Math.floor(i / 2);
+      const weekStartDate = new Date(planStartDate);
+      weekStartDate.setDate(planStartDate.getDate() + (weekIndex * 7));
       
       const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
       
@@ -190,7 +190,11 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({ data, in
       
       weeks.push({
         weekNumber: weekRow['Week #'] || '',
-        weekOf: weekRow['Week of'] || '',
+        weekOf: weekStartDate.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        }),
         weeklyTotal: weekRow['Weekly Total'] || '',
         totalTSS: weeklyTSS,
         workouts

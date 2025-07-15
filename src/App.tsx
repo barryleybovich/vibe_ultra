@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { FileUploader } from './components/FileUploader';
 import { FitnessInitializer } from './components/FitnessInitializer';
+import { PlanDateSelector } from './components/PlanDateSelector';
 import { TodaysWorkout } from './components/TodaysWorkout';
 import { TrainingPlanParser } from './components/TrainingPlanParser';
 import { TrainingStats } from './components/TrainingStats';
@@ -12,11 +13,13 @@ const STORAGE_KEYS = {
   TRAINING_DATA: 'ultramarathon_training_data',
   FITNESS_INITIALIZED: 'ultramarathon_fitness_initialized',
   INITIAL_FITNESS: 'ultramarathon_initial_fitness',
-  INITIAL_FATIGUE: 'ultramarathon_initial_fatigue'
+  INITIAL_FATIGUE: 'ultramarathon_initial_fatigue',
+  PLAN_START_DATE: 'ultramarathon_plan_start_date'
 };
 
 function App() {
   const [trainingData, setTrainingData] = useState<any[]>([]);
+  const [planStartDate, setPlanStartDate] = useState<Date | null>(null);
   const [fitnessInitialized, setFitnessInitialized] = useState(false);
   const [initialFitness, setInitialFitness] = useState(50);
   const [initialFatigue, setInitialFatigue] = useState(30);
@@ -29,6 +32,7 @@ function App() {
       const savedFitnessInitialized = localStorage.getItem(STORAGE_KEYS.FITNESS_INITIALIZED);
       const savedInitialFitness = localStorage.getItem(STORAGE_KEYS.INITIAL_FITNESS);
       const savedInitialFatigue = localStorage.getItem(STORAGE_KEYS.INITIAL_FATIGUE);
+      const savedPlanStartDate = localStorage.getItem(STORAGE_KEYS.PLAN_START_DATE);
 
       if (savedTrainingData) {
         const parsedData = JSON.parse(savedTrainingData);
@@ -46,6 +50,10 @@ function App() {
       if (savedInitialFatigue) {
         setInitialFatigue(parseFloat(savedInitialFatigue));
       }
+
+      if (savedPlanStartDate) {
+        setPlanStartDate(new Date(savedPlanStartDate));
+      }
     } catch (error) {
       console.error('Error loading saved data:', error);
       // Clear corrupted data
@@ -53,6 +61,7 @@ function App() {
       localStorage.removeItem(STORAGE_KEYS.FITNESS_INITIALIZED);
       localStorage.removeItem(STORAGE_KEYS.INITIAL_FITNESS);
       localStorage.removeItem(STORAGE_KEYS.INITIAL_FATIGUE);
+      localStorage.removeItem(STORAGE_KEYS.PLAN_START_DATE);
     }
   }, []);
 
@@ -76,10 +85,16 @@ function App() {
     localStorage.setItem(STORAGE_KEYS.INITIAL_FATIGUE, initialFatigue.toString());
   }, [initialFatigue]);
 
+  useEffect(() => {
+    if (planStartDate) {
+      localStorage.setItem(STORAGE_KEYS.PLAN_START_DATE, planStartDate.toISOString());
+    }
+  }, [planStartDate]);
   const handleDataParsed = (data: any[]) => {
     setTrainingData(data);
     setError('');
-    setFitnessInitialized(false); // Reset fitness initialization when new data is loaded
+    setFitnessInitialized(false);
+    setPlanStartDate(null); // Reset date selection when new data is loaded
   };
 
   const handleError = (errorMessage: string) => {
@@ -90,6 +105,7 @@ function App() {
 
   const handleReset = () => {
     setTrainingData([]);
+    setPlanStartDate(null);
     setFitnessInitialized(false);
     setError('');
     // Clear localStorage when resetting
@@ -97,6 +113,7 @@ function App() {
     localStorage.removeItem(STORAGE_KEYS.FITNESS_INITIALIZED);
     localStorage.removeItem(STORAGE_KEYS.INITIAL_FITNESS);
     localStorage.removeItem(STORAGE_KEYS.INITIAL_FATIGUE);
+    localStorage.removeItem(STORAGE_KEYS.PLAN_START_DATE);
   };
 
   const handleFitnessInitialize = (fitness: number, fatigue: number) => {
@@ -105,8 +122,11 @@ function App() {
     setFitnessInitialized(true);
   };
 
+  const handleDateSelected = (startDate: Date) => {
+    setPlanStartDate(startDate);
+  };
   const generateChartData = () => {
-    if (!fitnessInitialized || trainingData.length === 0) return [];
+    if (!fitnessInitialized || trainingData.length === 0 || !planStartDate) return [];
     
     const chartData: Array<{
       date: string;
@@ -171,10 +191,10 @@ function App() {
       
       if (!weekRow || !descriptionRow) continue;
       
-      const weekOfStr = weekRow['Week of'] || '';
-      const weekStartDate = new Date(weekOfStr);
-      
-      if (isNaN(weekStartDate.getTime())) continue;
+      // Calculate week start date based on plan start date and week index
+      const weekIndex = Math.floor(i / 2);
+      const weekStartDate = new Date(planStartDate);
+      weekStartDate.setDate(planStartDate.getDate() + (weekIndex * 7));
       
       const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
       
@@ -254,17 +274,21 @@ function App() {
         ) : (
           !fitnessInitialized ? (
             <FitnessInitializer onInitialize={handleFitnessInitialize} />
+          ) : !planStartDate ? (
+            <PlanDateSelector onDateSelected={handleDateSelected} />
           ) : (
             <div className="space-y-8">
               <FitnessChart data={generateChartData()} />
               <TodaysWorkout 
                 data={trainingData}
+                planStartDate={planStartDate}
                 initialFitness={initialFitness}
                 initialFatigue={initialFatigue}
               />
             <TrainingStats data={trainingData} />
               <TrainingPlanParser 
                 data={trainingData} 
+                planStartDate={planStartDate}
                 initialFitness={initialFitness}
                 initialFatigue={initialFatigue}
               />
