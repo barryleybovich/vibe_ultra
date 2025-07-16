@@ -183,6 +183,10 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({
       weekStartDate = new Date(planStartDate);
       weekStartDate.setDate(planStartDate.getDate() + (weekIndex * 7));
       
+      // Calculate "week of" date (Sunday) without modifying weekStartDate
+      const weekOfDate = new Date(weekStartDate);
+      weekOfDate.setDate(weekStartDate.getDate() + 6); // Add 6 days to get Sunday
+      
       const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
       const workouts: WorkoutDay[] = [];
       let weeklyTSS = 0;
@@ -224,7 +228,7 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({
       
       weeks.push({
         weekNumber: weekRow['Week #'] || '',
-        weekOf: weekStartDate.toLocaleDateString('en-US', { 
+        weekOf: weekOfDate.toLocaleDateString('en-US', { 
           year: 'numeric', 
           month: 'short', 
           day: 'numeric' 
