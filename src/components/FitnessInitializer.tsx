@@ -19,7 +19,7 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
     if (dayOfWeek === 0) { // Sunday
       daysUntilMonday = 1;
     } else if (dayOfWeek === 1) { // Monday
-      daysUntilMonday = 7; // Next Monday is 7 days away
+      daysUntilMonday = 0; // Next Monday is 7 days away
     } else { // Tuesday through Saturday
       daysUntilMonday = 8 - dayOfWeek;
     }
