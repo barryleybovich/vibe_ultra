@@ -32,6 +32,7 @@ export const PlanLibrary: React.FC<PlanLibraryProps> = ({ onPlanSelected, onErro
   const [selectedPlan, setSelectedPlan] = useState<string>('');
   const [showSWAPModal, setShowSWAPModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [parsedPlanData, setParsedPlanData] = useState<any[] | null>(null);
 
   const handlePlanSelection = async () => {
     if (!selectedPlan) return;
@@ -74,17 +75,22 @@ export const PlanLibrary: React.FC<PlanLibraryProps> = ({ onPlanSelected, onErro
       // Remove header row
       const parsedData = data.slice(1);
       
+      // Store parsed data and show modal
+      setParsedPlanData(parsedData);
       setShowSWAPModal(true);
-      
-      // Pass data after modal is acknowledged
-      setTimeout(() => {
-        onPlanSelected(parsedData);
-      }, 100);
       
     } catch (error) {
       onError(`Error loading plan: ${(error as Error).message}`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleModalAcknowledge = () => {
+    setShowSWAPModal(false);
+    if (parsedPlanData) {
+      onPlanSelected(parsedPlanData);
+      setParsedPlanData(null);
     }
   };
 
@@ -112,7 +118,7 @@ export const PlanLibrary: React.FC<PlanLibraryProps> = ({ onPlanSelected, onErro
           
           <div className="flex justify-end">
             <button
-              onClick={() => setShowSWAPModal(false)}
+              onClick={handleModalAcknowledge}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
               Got it!
