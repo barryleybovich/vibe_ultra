@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { FileUploader } from './components/FileUploader';
+import { PlanLibrary } from './components/PlanLibrary';
 import { FitnessInitializer } from './components/FitnessInitializer';
 import { TodaysWorkout } from './components/TodaysWorkout';
 import { TrainingPlanParser } from './components/TrainingPlanParser';
@@ -295,10 +296,23 @@ function App() {
               Welcome to your Training Plan Parser
             </h2>
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              Upload your ultramarathon training plan to get started. 
-              We'll parse your workouts and display them in an easy-to-read format.
+              Choose a plan from our library or upload your own ultramarathon training plan to get started.
             </p>
-            <FileUploader onDataParsed={handleDataParsed} onError={handleError} />
+            
+            <div className="max-w-2xl mx-auto space-y-8">
+              <PlanLibrary onPlanSelected={handleDataParsed} onError={handleError} />
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-gray-50 text-gray-500">or</span>
+                </div>
+              </div>
+              
+              <FileUploader onDataParsed={handleDataParsed} onError={handleError} />
+            </div>
           </div>
         ) : (
           !fitnessInitialized ? (

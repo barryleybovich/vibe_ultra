@@ -99,6 +99,16 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
           </div>
         </div>
 
+        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <h4 className="font-medium text-gray-900 mb-2">Preview Form Score</h4>
+          <div className="text-2xl font-bold text-blue-600">
+            {(parseFloat(fitness) / parseFloat(fatigue) || 0).toFixed(2)}
+          </div>
+          <p className="text-sm text-gray-600">
+            Form = Fitness ÷ Fatigue • Higher values indicate better readiness
+          </p>
+        </div>
+
         <div>
           <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
             <Calendar className="w-4 h-4 mr-2 text-blue-600" />
@@ -128,16 +138,6 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
         >
           Use Next Monday ({new Date(suggestedDate).toLocaleDateString()})
         </button>
-
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-2">Preview Form Score</h4>
-          <div className="text-2xl font-bold text-blue-600">
-            {(parseFloat(fitness) / parseFloat(fatigue) || 0).toFixed(2)}
-          </div>
-          <p className="text-sm text-gray-600">
-            Form = Fitness ÷ Fatigue • Higher values indicate better readiness
-          </p>
-        </div>
 
         <button
           type="submit"
