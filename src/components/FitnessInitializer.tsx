@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TrendingUp, Zap, Target, Info, Calendar } from 'lucide-react';
 
 interface FitnessInitializerProps {
@@ -10,6 +10,10 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
   const [fatigue, setFatigue] = useState<string>('55');
   const [selectedDate, setSelectedDate] = useState<string>('');
 
+  useEffect(() => {
+  setSelectedDate(suggestedDate);
+}, [suggestedDate]);
+  
   const getNextMonday = () => {
     const today = new Date();
     const dayOfWeek = today.getDay();
@@ -140,13 +144,6 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setSelectedDate(suggestedDate)}
-          className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-200 mb-2"
-        >
-          Use Next Monday ({new Date(suggestedDate).toLocaleDateString()})
-        </button>
 
         <button
           type="submit"
