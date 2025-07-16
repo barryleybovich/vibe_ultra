@@ -113,7 +113,7 @@ export const PlanLibrary: React.FC<PlanLibraryProps> = ({ onPlanSelected, onErro
             >
               SWAP Running
             </a>
-            . Run Like a puppy, train like a rockstar.
+            . Run like a puppy, train like a rockstar.
           </p>
           
           <div className="flex justify-end">
