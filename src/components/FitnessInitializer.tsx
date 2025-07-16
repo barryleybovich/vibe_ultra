@@ -13,7 +13,16 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
   const getNextMonday = () => {
     const today = new Date();
     const dayOfWeek = today.getDay();
-    const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek; // If Sunday (0), next Monday is 1 day away
+    // Calculate days until next Monday
+    // Sunday = 0, Monday = 1, Tuesday = 2, ..., Saturday = 6
+    let daysUntilMonday;
+    if (dayOfWeek === 0) { // Sunday
+      daysUntilMonday = 1;
+    } else if (dayOfWeek === 1) { // Monday
+      daysUntilMonday = 7; // Next Monday is 7 days away
+    } else { // Tuesday through Saturday
+      daysUntilMonday = 8 - dayOfWeek;
+    }
     const nextMonday = new Date(today);
     nextMonday.setDate(today.getDate() + daysUntilMonday);
     return nextMonday.toISOString().split('T')[0];
