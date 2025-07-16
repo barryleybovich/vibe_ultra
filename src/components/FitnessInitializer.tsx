@@ -10,9 +10,7 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
   const [fatigue, setFatigue] = useState<string>('55');
   const [selectedDate, setSelectedDate] = useState<string>('');
 
-  useEffect(() => {
-  setSelectedDate(suggestedDate);
-}, [suggestedDate]);
+
   
   const getNextMonday = () => {
     const today = new Date();
@@ -33,7 +31,10 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
   };
 
   const suggestedDate = getNextMonday();
-
+  useEffect(() => {
+  setSelectedDate(suggestedDate);
+}, [suggestedDate]);
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const fitnessValue = parseFloat(fitness) || 50;
