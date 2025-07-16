@@ -261,6 +261,12 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({
     const plannedTSS = estimateTSS(workout.training, workout.description);
     const actualTSS = actualTSSData[workoutKey];
     
+    // Calculate the actual date for this specific workout day
+    const weekStartDate = new Date(planStartDate);
+    weekStartDate.setDate(planStartDate.getDate() + (weekIndex * 7));
+    const workoutDate = new Date(weekStartDate);
+    workoutDate.setDate(weekStartDate.getDate() + dayIndex);
+    
     setSelectedWorkout({
       workout: {
         ...workout,
@@ -268,7 +274,11 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({
         actualTSS
       },
       weekNumber,
-      weekOf,
+      weekOf: workoutDate.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      }),
       workoutKey
     });
   };
