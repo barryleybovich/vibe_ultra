@@ -402,7 +402,7 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({
                                 <span className={`text-xs font-medium ${
                                   isLowForm ? 'text-red-700' : 'text-blue-700'
                                 }`}>
-                                  {workout.form.toFixed(2)}
+                                  {(todaysWorkout.form * 100).toFixed(0)}%
                                 </span>
                               </div>
                             </div>
