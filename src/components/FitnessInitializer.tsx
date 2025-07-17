@@ -128,7 +128,7 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
     : '0%'}
 </div>
           <p className="text-sm text-gray-600">
-            Higher values indicate better readiness, values below -30% indicate injury potential.
+            Values below -30% indicate injury potential, values above -10% indicate maintenance or detraining.
           </p>
         </div>
 
