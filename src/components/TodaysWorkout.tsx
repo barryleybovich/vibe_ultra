@@ -193,7 +193,7 @@ export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({
     );
   }
 
-  const isLowForm = todaysWorkout.form < 0.75;
+  const isLowForm = todaysWorkout.form < -0.25;
 
   return (
     <div className={`rounded-lg shadow-md border p-6 mb-8 ${
@@ -305,7 +305,7 @@ export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({
               <span className={`text-lg font-bold ${
                 isLowForm ? 'text-red-700' : 'text-blue-700'
               }`}>
-                {todaysWorkout.form.toFixed(2)}
+                {(todaysWorkout.form * 100).toFixed(0)}%
               </span>
             </div>
           </div>
