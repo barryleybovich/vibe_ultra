@@ -344,7 +344,7 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({
             <div className="grid grid-cols-7 gap-2 md:gap-4">
               {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((dayName, dayIndex) => {
                 const workout = week.workouts.find(w => w.day === dayName);
-                const isLowForm = workout && workout.form < 0.5;
+                const isLowForm = workout && workout.form < -0.25;
                 const workoutKey = `${index}-${dayIndex}`;
                 const plannedTSS = workout ? estimateTSS(workout.training, workout.description) : 0;
                 const actualTSS = actualTSSData[workoutKey];
