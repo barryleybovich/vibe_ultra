@@ -54,6 +54,7 @@ export const FitnessChart: React.FC<FitnessChartProps> = ({ data }) => {
               orientation="right" 
               stroke="#3b82f6" 
               fontSize={12}
+              tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
 />
             
             <Tooltip content={<CustomTooltip />} />
