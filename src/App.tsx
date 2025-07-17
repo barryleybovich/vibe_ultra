@@ -242,7 +242,7 @@ function App() {
         currentFitness = currentFitness + fitnessAlpha * (tss - currentFitness);
         currentFatigue = currentFatigue + fatigueAlpha * (tss - currentFatigue);
         
-        const form = currentFatigue > 0 ? currentFitness / currentFatigue : 0;
+        const form = currentFatigue > 0 ? (currentFitness - currentFatigue) / currentFitness: 0;
         
         chartData.push({
           date: dayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
