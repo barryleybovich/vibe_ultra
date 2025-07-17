@@ -295,10 +295,7 @@ function App() {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               Welcome to your Training Plan Parser
             </h2>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              Choose a plan from our library or upload your own ultramarathon training plan to get started.
-            </p>
-            
+           
             <div className="max-w-2xl mx-auto space-y-8">
               <PlanLibrary onPlanSelected={handleDataParsed} onError={handleError} />
               
