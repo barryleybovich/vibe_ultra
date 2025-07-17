@@ -349,13 +349,13 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({
                 const actualTSS = actualTSSData[workoutKey];
                 const hasActualTSS = actualTSS !== undefined;
                 return (
-                  <div key={dayName} className="min-h-[80px]">
+                  <div key={dayName} className="min-h-[80px] flex flex-col h-full">
                     <div className="text-center mb-2">
                       <h4 className="font-semibold text-gray-900 text-sm md:text-base">{dayName}</h4>
                     </div>
                     {workout ? (
                       <div 
-                        className={`border rounded-lg p-2 md:p-3 hover:shadow-md transition-shadow duration-200 cursor-pointer hover:bg-gray-50 ${
+                        className={`border rounded-lg p-2 md:p-3 hover:shadow-md transition-shadow duration-200 cursor-pointer hover:bg-gray-50 flex flex-col h-full ${
                         isLowForm ? 'bg-red-50 border-red-200' : ''
                         }`}
                         onClick={() => handleWorkoutClick(workout, week.weekNumber, week.weekOf, index, dayIndex)}
@@ -416,7 +416,7 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({
                       </div>
                     ) : (
                       <div 
-                        className={`border rounded-lg p-2 md:p-3 cursor-pointer hover:bg-gray-50 ${
+                        className={`border rounded-lg p-2 md:p-3 cursor-pointer hover:bg-gray-50 flex flex-col h-full ${
                         isLowForm ? 'bg-red-50 border-red-200' : 'bg-gray-50'
                         }`}
                         onClick={() => {
