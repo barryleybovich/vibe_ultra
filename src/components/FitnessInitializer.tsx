@@ -143,7 +143,7 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
             required
           />
           <p className="text-xs text-gray-500 mt-1">
-            Suggested: {new Date(suggestedDate).toLocaleDateString('en-US')}
+            For best results, please select a Monday as your starting date.
           </p>
         </div>
 
