@@ -128,7 +128,7 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
     : '0%'}
 </div>
           <p className="text-sm text-gray-600">
-            Form = Fitness ÷ Fatigue • Higher values indicate better readiness
+            Higher values indicate better readiness, values below -30% indicate injury potential.
           </p>
         </div>
 
