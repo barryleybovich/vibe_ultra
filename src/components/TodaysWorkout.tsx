@@ -103,7 +103,8 @@ export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({
         currentFitness = currentFitness + fitnessAlpha * (effectiveTSS - currentFitness);
         currentFatigue = currentFatigue + fatigueAlpha * (effectiveTSS - currentFatigue);
         
-        const form = currentFatigue > 0 ? currentFitness / currentFatigue : 0;
+        const form = currentFatigue > 0 ? (currentFitness - currentFatigue) / currentFitness
+          : 0;
         
         if (dayDate.getTime() === today.getTime()) {
           return {
