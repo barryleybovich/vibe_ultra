@@ -121,10 +121,12 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
         </div>
 
         <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <h4 className="font-medium text-gray-900 mb-2">Preview Form Score</h4>
+          <h4 className="font-medium text-gray-900 mb-2">Form Score</h4>
           <div className="text-2xl font-bold text-blue-600">
-            {(parseFloat(fitness) / parseFloat(fatigue) || 0).toFixed(2)}
-          </div>
+  {(parseFloat(fitness) > 0)
+    ? `${(((parseFloat(fitness) - parseFloat(fatigue)) / parseFloat(fitness)) * 100).toFixed(0)}%`
+    : '0%'}
+</div>
           <p className="text-sm text-gray-600">
             Form = Fitness ÷ Fatigue • Higher values indicate better readiness
           </p>
