@@ -72,7 +72,7 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
             <ul className="space-y-1">
               <li><strong>Fitness:</strong> 42-day trailing average of daily TSS (chronic training load)</li>
               <li><strong>Fatigue:</strong> 7-day trailing average of daily TSS (acute training load)</li>
-              <li><strong>Form:</strong> Fitness ÷ Fatigue ratio (readiness to perform)</li>
+              <li><strong>Form:</strong> (Fitness - Fatigue)/Fitness ratio (readiness to perform)</li>
               <li><strong>Start Date:</strong> Training plans should begin on a Monday for proper week alignment</li>
             </ul>
           </div>
