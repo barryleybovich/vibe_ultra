@@ -355,7 +355,7 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({
                     </div>
                     {workout ? (
                       <div 
-                        className={`border rounded-lg p-2 md:p-3 hover:shadow-md transition-shadow duration-200 h-full cursor-pointer hover:bg-gray-50 ${
+                        className={`border rounded-lg p-2 md:p-3 hover:shadow-md transition-shadow duration-200 cursor-pointer hover:bg-gray-50 ${
                         isLowForm ? 'bg-red-50 border-red-200' : ''
                         }`}
                         onClick={() => handleWorkoutClick(workout, week.weekNumber, week.weekOf, index, dayIndex)}
@@ -416,7 +416,7 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({
                       </div>
                     ) : (
                       <div 
-                        className={`border rounded-lg p-2 md:p-3 h-full cursor-pointer hover:bg-gray-50 ${
+                        className={`border rounded-lg p-2 md:p-3 cursor-pointer hover:bg-gray-50 ${
                         isLowForm ? 'bg-red-50 border-red-200' : 'bg-gray-50'
                         }`}
                         onClick={() => {
