@@ -70,7 +70,7 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
   };
 
   const effectiveTSS = workout.actualTSS ?? workout.plannedTSS;
-  const isLowForm = workout.form < 0.75;
+  const isLowForm = workout.form < -0.25;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -194,7 +194,7 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
                 <span className={`text-lg font-bold ${
                   isLowForm ? 'text-red-700' : 'text-blue-700'
                 }`}>
-                  {workout.form.toFixed(2)}
+                  {(workout.form * 100).toFixed(0)}%
                 </span>
               </div>
             </div>
