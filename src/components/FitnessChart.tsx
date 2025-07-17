@@ -82,6 +82,7 @@ export const FitnessChart: React.FC<FitnessChartProps> = ({ data }) => {
               yAxisId="right"
               stroke="#3b82f6" 
               strokeWidth={2}
+              strokeDasharray="5 5"
               name="Form"
               dot={{ fill: '#3b82f6', strokeWidth: 1, r: 3 }}
             />
@@ -91,7 +92,6 @@ export const FitnessChart: React.FC<FitnessChartProps> = ({ data }) => {
               yAxisId="left"
               stroke="#8b5cf6" 
               strokeWidth={1}
-              strokeDasharray="5 5"
               name="Daily TSS"
               dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 2 }}
             />
