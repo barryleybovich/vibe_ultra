@@ -27,7 +27,14 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
     }
     const nextMonday = new Date(today);
     nextMonday.setDate(today.getDate() + daysUntilMonday);
-    return nextMonday.toISOString().split('T')[0]; // 'YYYY-MM-DD';
+    
+    
+   // Format as YYYY-MM-DD in local time
+  const year = nextMonday.getFullYear();
+  const month = String(nextMonday.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const day = String(nextMonday.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
   };
 
   const suggestedDate = getNextMonday();
