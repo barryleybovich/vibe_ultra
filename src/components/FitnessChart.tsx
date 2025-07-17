@@ -44,12 +44,24 @@ export const FitnessChart: React.FC<FitnessChartProps> = ({ data }) => {
               fontSize={12}
               interval="preserveStartEnd"
             />
-            <YAxis stroke="#666" fontSize={12} />
+            <YAxis 
+              yAxisId="left" 
+              stroke="#666" 
+              fontSize={12}
+              />
+            <YAxis 
+              yAxisId="right" 
+              orientation="right" 
+              stroke="#3b82f6" 
+              fontSize={12}
+/>
+            
             <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Line 
               type="monotone" 
               dataKey="fitness" 
+              yAxisId="left" 
               stroke="#10b981" 
               strokeWidth={2}
               name="Fitness (CTL)"
@@ -58,6 +70,7 @@ export const FitnessChart: React.FC<FitnessChartProps> = ({ data }) => {
             <Line 
               type="monotone" 
               dataKey="fatigue" 
+              yAxisId="left"
               stroke="#ef4444" 
               strokeWidth={2}
               name="Fatigue (ATL)"
@@ -66,6 +79,7 @@ export const FitnessChart: React.FC<FitnessChartProps> = ({ data }) => {
             <Line 
               type="monotone" 
               dataKey="form" 
+              yAxisId="right"
               stroke="#3b82f6" 
               strokeWidth={2}
               name="Form"
@@ -74,6 +88,7 @@ export const FitnessChart: React.FC<FitnessChartProps> = ({ data }) => {
             <Line 
               type="monotone" 
               dataKey="tss" 
+              yAxisId="left"
               stroke="#8b5cf6" 
               strokeWidth={1}
               strokeDasharray="5 5"
