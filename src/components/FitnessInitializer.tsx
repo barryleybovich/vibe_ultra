@@ -27,7 +27,7 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
     }
     const nextMonday = new Date(today);
     nextMonday.setDate(today.getDate() + daysUntilMonday);
-    return nextMonday.toLocaleDateString();
+    return nextMonday.toISOString().split('T')[0]; // 'YYYY-MM-DD';
   };
 
   const suggestedDate = getNextMonday();
