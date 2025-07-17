@@ -149,7 +149,8 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({
         currentFitness = currentFitness * fitnessAlpha + effectiveTSS * (1 - fitnessAlpha);
         currentFatigue = currentFatigue * fatigueAlpha + effectiveTSS * (1 - fatigueAlpha);
         
-        const form = currentFatigue > 0 ? currentFitness / currentFatigue : 0;
+        const form = currentFatigue > 0 ? (currentFitness - currentFatigue) / currentFitness
+          : 0;
         
         allDays.push({
           date: dayDate,
