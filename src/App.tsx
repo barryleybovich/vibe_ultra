@@ -290,7 +290,7 @@ function App() {
         )}
 
         {trainingData.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-4">
             <Mountain className="w-16 h-16 text-gray-400 mx-auto mb-6" />
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               Welcome to your Training Plan Parser
