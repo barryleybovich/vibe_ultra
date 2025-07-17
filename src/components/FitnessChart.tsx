@@ -83,7 +83,7 @@ export const FitnessChart: React.FC<FitnessChartProps> = ({ data }) => {
               stroke="#3b82f6" 
               strokeWidth={2}
               name="Form"
-              dot={{ fill: '#3b82f6', strokeWidth: 2, r: 3 }}
+              dot={{ fill: '#3b82f6', strokeWidth: 1, r: 3 }}
             />
             <Line 
               type="monotone" 
@@ -93,7 +93,7 @@ export const FitnessChart: React.FC<FitnessChartProps> = ({ data }) => {
               strokeWidth={1}
               strokeDasharray="5 5"
               name="Daily TSS"
-              dot={{ fill: '#8b5cf6', strokeWidth: 1, r: 2 }}
+              dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 2 }}
             />
           </LineChart>
         </ResponsiveContainer>
