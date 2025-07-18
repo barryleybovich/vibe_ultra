@@ -13,6 +13,11 @@ export async function unsubscribeFromEmails(userId: string) {
     .update({ subscribed_to_emails: false, updated_at: new Date().toISOString() })
     .eq('id', userId);
 }
+export async function createUserProfile(userId: string, email: string) {
+  return supabase
+    .from('profiles')
+    .insert({ id: userId, email });
+}
 
 export async function upsertTrainingPlan(
   userId: string,
