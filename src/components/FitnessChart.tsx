@@ -19,12 +19,18 @@ export const FitnessChart: React.FC<FitnessChartProps> = ({ data }) => {
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-md">
           <p className="font-medium text-gray-900 mb-2">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }} className="text-sm">
-              {entry.name}: {entry.value.toFixed(1)}
-              {entry.name === 'TSS' ? '' : entry.name === 'Form' ? '' : ' TSS'}
-            </p>
-          ))}
+          {payload.map((entry: any, index: number) => {
+            const value =
+              entry.name === 'Form'
+                ? `${(entry.value * 100).toFixed(0)}%`
+                : entry.value.toFixed(1);
+            return (
+              <p key={index} style={{ color: entry.color }} className="text-sm">
+                {entry.name}: {value}
+                {entry.name === 'TSS' || entry.name === 'Form' ? '' : ' TSS'}
+              </p>
+            );
+          })}
         </div>
       );
     }
@@ -49,12 +55,13 @@ export const FitnessChart: React.FC<FitnessChartProps> = ({ data }) => {
               stroke="#666" 
               fontSize={12}
               />
-            <YAxis 
-              yAxisId="right" 
-              orientation="right" 
-              stroke="#3b82f6" 
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              stroke="#3b82f6"
               fontSize={12}
-/>
+              tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+            />
             
             <Tooltip content={<CustomTooltip />} />
             <Legend />
