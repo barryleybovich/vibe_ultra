@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { supabase } from './lib/supabase';
-import { AuthForm } from './components/AuthForm';
 import { AuthStatus } from './components/AuthStatus';
+import { EmailSubscription } from './components/EmailSubscription';
 import { FileUploader } from './components/FileUploader';
 import { PlanLibrary } from './components/PlanLibrary';
 import { FitnessInitializer } from './components/FitnessInitializer';
@@ -141,11 +141,6 @@ function App() {
   };
 
   const handleReset = () => {
-    // Sign out user if authenticated
-    if (session) {
-      supabase.auth.signOut();
-    }
-    
     setTrainingData([]);
     setPlanStartDate(null);
     setFitnessInitialized(false);
@@ -312,14 +307,14 @@ function App() {
             </div>
             <div className="flex items-center space-x-4">
               {session && <AuthStatus user={session.user} />}
-            {trainingData.length > 0 && (
-              <button
-                onClick={handleReset}
-                className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200"
-              >
-                Upload New Plan
-              </button>
-            )}
+              {trainingData.length > 0 && (
+                <button
+                  onClick={handleReset}
+                  className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+                >
+                  Upload New Plan
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -335,21 +330,14 @@ function App() {
           </div>
         )}
 
-        {!session ? (
-          <div className="max-w-md mx-auto">
-            <AuthForm onAuthSuccess={() => {
-              // Optional: You could trigger data migration here
-              console.log('User authenticated successfully');
-            }} />
-          </div>
-        ) : trainingData.length === 0 ? (
+        {trainingData.length === 0 ? (
           <div className="text-center py-4">
             <Mountain className="w-16 h-16 text-gray-400 mx-auto mb-6" />
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               Welcome to your Training Plan Parser
             </h2>
             <p className="text-gray-600 mb-6">
-              You're signed in as {session.user.email}. Your data will be saved to the cloud.
+              Upload a training plan to get started with your ultramarathon training analysis
             </p>
            
             <div className="max-w-2xl mx-auto space-y-8">
@@ -373,6 +361,14 @@ function App() {
           ) : (
             <div className="space-y-8">
               <FitnessChart data={generateChartData()} />
+              
+              <EmailSubscription 
+                session={session}
+                onAuthSuccess={() => {
+                  console.log('User authenticated for email notifications');
+                }}
+              />
+              
               <TodaysWorkout 
                 data={trainingData}
                 planStartDate={planStartDate}
@@ -380,6 +376,7 @@ function App() {
                 initialFatigue={initialFatigue}
                 actualTSSData={actualTSSData}
               />
+              
             <TrainingStats data={trainingData} />
               <TrainingPlanParser 
                 data={trainingData} 
