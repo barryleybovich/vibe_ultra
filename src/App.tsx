@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
+import { supabase } from './lib/supabase';
+import { AuthForm } from './components/AuthForm';
+import { AuthStatus } from './components/AuthStatus';
 import { FileUploader } from './components/FileUploader';
 import { PlanLibrary } from './components/PlanLibrary';
 import { FitnessInitializer } from './components/FitnessInitializer';
@@ -8,6 +11,7 @@ import { TrainingPlanParser } from './components/TrainingPlanParser';
 import { TrainingStats } from './components/TrainingStats';
 import { FitnessChart } from './components/FitnessChart';
 import { Mountain, AlertCircle } from 'lucide-react';
+import type { Session } from '@supabase/supabase-js';
 
 const STORAGE_KEYS = {
   TRAINING_DATA: 'ultramarathon_training_data',
@@ -19,6 +23,8 @@ const STORAGE_KEYS = {
 };
 
 function App() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [trainingData, setTrainingData] = useState<any[]>([]);
   const [planStartDate, setPlanStartDate] = useState<Date | null>(null);
   const [fitnessInitialized, setFitnessInitialized] = useState(false);
@@ -26,6 +32,25 @@ function App() {
   const [initialFatigue, setInitialFatigue] = useState(30);
   const [actualTSSData, setActualTSSData] = useState<Record<string, number>>({});
   const [error, setError] = useState<string>('');
+
+  // Handle authentication state changes
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Load data from localStorage on component mount
   useEffect(() => {
@@ -116,6 +141,11 @@ function App() {
   };
 
   const handleReset = () => {
+    // Sign out user if authenticated
+    if (session) {
+      supabase.auth.signOut();
+    }
+    
     setTrainingData([]);
     setPlanStartDate(null);
     setFitnessInitialized(false);
@@ -256,6 +286,19 @@ function App() {
     
     return chartData;
   };
+
+  // Show loading spinner while checking auth status
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm border-b border-gray-200">
@@ -267,6 +310,8 @@ function App() {
                 Ultramarathon Training Plan
               </h1>
             </div>
+            <div className="flex items-center space-x-4">
+              {session && <AuthStatus user={session.user} />}
             {trainingData.length > 0 && (
               <button
                 onClick={handleReset}
@@ -275,6 +320,7 @@ function App() {
                 Upload New Plan
               </button>
             )}
+            </div>
           </div>
         </div>
       </div>
@@ -289,12 +335,22 @@ function App() {
           </div>
         )}
 
-        {trainingData.length === 0 ? (
+        {!session ? (
+          <div className="max-w-md mx-auto">
+            <AuthForm onAuthSuccess={() => {
+              // Optional: You could trigger data migration here
+              console.log('User authenticated successfully');
+            }} />
+          </div>
+        ) : trainingData.length === 0 ? (
           <div className="text-center py-4">
             <Mountain className="w-16 h-16 text-gray-400 mx-auto mb-6" />
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               Welcome to your Training Plan Parser
             </h2>
+            <p className="text-gray-600 mb-6">
+              You're signed in as {session.user.email}. Your data will be saved to the cloud.
+            </p>
            
             <div className="max-w-2xl mx-auto space-y-8">
               <PlanLibrary onPlanSelected={handleDataParsed} onError={handleError} />
