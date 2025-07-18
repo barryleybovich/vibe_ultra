@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, AlertCircle, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { createUserProfile } from '../lib/database';
 
 interface AuthFormProps {
   onAuthSuccess?: () => void;
@@ -22,14 +23,16 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
         });
 
         if (error) {
           setError(error.message);
-        } else {
+        } else {          if (data.user) {
+            await createUserProfile(data.user.id, data.user.email ?? email);
+          }
           setMessage('Check your email for the confirmation link!');
         }
       } else {
