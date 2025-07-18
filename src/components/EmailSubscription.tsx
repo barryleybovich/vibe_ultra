@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Bell, CheckCircle, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import {
+  subscribeToEmails,
+  unsubscribeFromEmails
+} from '../lib/database';
 import { AuthForm } from './AuthForm';
 import type { Session } from '@supabase/supabase-js';
 
@@ -17,6 +21,20 @@ export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
+ useEffect(() => {
+    const fetchStatus = async () => {
+      if (!session) return;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('subscribed_to_emails')
+        .eq('id', session.user.id)
+        .single();
+      if (!error && data) {
+        setSubscribed(data.subscribed_to_emails);
+      }
+    };
+    fetchStatus();
+  }, [session]);
 
   const handleSubscribe = async () => {
     if (!session) {
@@ -28,9 +46,8 @@ export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({
     setError('');
 
     try {
-      // Here you would typically save the user's email subscription preference
-      // For now, we'll just simulate the subscription
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await subscribeToEmails(session.user.id);
+      if (error) throw error;
       setSubscribed(true);
     } catch (err) {
       setError('Failed to subscribe to email notifications');
@@ -44,8 +61,9 @@ export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({
     setError('');
 
     try {
-      // Here you would typically remove the user's email subscription preference
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!session) return;
+      const { error } = await unsubscribeFromEmails(session.user.id);
+      if (error) throw error;
       setSubscribed(false);
     } catch (err) {
       setError('Failed to unsubscribe from email notifications');
