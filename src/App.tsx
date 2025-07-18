@@ -12,6 +12,12 @@ import { TrainingStats } from './components/TrainingStats';
 import { FitnessChart } from './components/FitnessChart';
 import { Mountain, AlertCircle } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
+import {
+  upsertTrainingPlan,
+  upsertFitnessSettings,
+  upsertDailyTSS,
+  deleteDailyTSS
+} from './lib/database';
 
 const STORAGE_KEYS = {
   TRAINING_DATA: 'ultramarathon_training_data',
@@ -132,6 +138,9 @@ function App() {
     setError('');
     setFitnessInitialized(false);
     setPlanStartDate(null); // Reset date selection when new data is loaded
+     if (session) {
+      upsertTrainingPlan(session.user.id, 'default', data);
+    }
   };
 
   const handleError = (errorMessage: string) => {
@@ -160,7 +169,14 @@ function App() {
     setInitialFatigue(fatigue);
     setPlanStartDate(startDate);
     setFitnessInitialized(true);
-  };
+     if (session) {
+      upsertFitnessSettings(
+        session.user.id,
+        fitness,
+        fatigue,
+        startDate.toISOString().split('T')[0]
+      );
+    } };
 
   const handleActualTSSUpdate = (workoutKey: string, actualTSS: number | null) => {
     setActualTSSData(prev => {
@@ -172,6 +188,21 @@ function App() {
       }
       return updated;
     });
+  
+    if (session && planStartDate) {
+      const [weekIndexStr, dayIndexStr] = workoutKey.split('-');
+      const weekIndex = parseInt(weekIndexStr, 10);
+      const dayIndex = parseInt(dayIndexStr, 10);
+      const date = new Date(planStartDate);
+      date.setDate(planStartDate.getDate() + weekIndex * 7 + dayIndex);
+      const isoDate = date.toISOString().split('T')[0];
+
+      if (actualTSS === null) {
+        deleteDailyTSS(session.user.id, isoDate);
+      } else {
+        upsertDailyTSS(session.user.id, isoDate, actualTSS);
+      }
+    }
   };
 
   const generateChartData = () => {
