@@ -1,12 +1,34 @@
 import { supabase } from './supabase';
 
 export async function subscribeToEmails(userId: string) {
+  const { data: existingProfile, error: selectError } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', userId)
+    .single();
+
+  if (selectError && selectError.code !== 'PGRST116') {
+    return { error: selectError };
+  }
+
+  if (!existingProfile) {
+    const {
+      data: {
+        user
+      }
+    } = await supabase.auth.getUser();
+
+    return supabase.from('profiles').insert({
+      id: userId,
+      email: user?.email ?? null,
+      subscribed_to_emails: true,
+      updated_at: new Date().toISOString()
+    });
+  }
   return supabase
     .from('profiles')
-    .upsert(
-      { id: userId, subscribed_to_emails: true, updated_at: new Date().toISOString() },
-      { onConflict: 'id' }
-    );
+    .update({ subscribed_to_emails: true, updated_at: new Date().toISOString() })
+    .eq('id', userId);
 }
 
 export async function unsubscribeFromEmails(userId: string) {
