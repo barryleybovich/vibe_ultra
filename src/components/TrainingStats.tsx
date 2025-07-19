@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrendingUp, Calendar, Target, Activity } from 'lucide-react';
+import { estimateTSS } from '../lib/workoutUtils';
 
 interface TrainingStatsProps {
   data: any[];
@@ -20,50 +21,6 @@ interface TrainingWeek {
   workouts: WorkoutDay[];
 }
 export const TrainingStats: React.FC<TrainingStatsProps> = ({ data }) => {
-  const estimateTSS = (training: string, description: string): number => {
-    if (training.toLowerCase() === 'rest' || training.toLowerCase().includes('travel')) {
-      return 0;
-    }
-    
-    if (training.toLowerCase().includes('x-train') || training.toLowerCase() === 'x-train') {
-      return 22.5;
-    }
-    
-    const miles = parseFloat(training);
-    if (!isNaN(miles) && miles > 0) {
-      const desc = description.toLowerCase();
-      const hardKeywords = ['hard', 'threshold', 'tempo', '10k', '5k', 'vo2', 'fast', 'hills', 'ladder'];
-      const moderateKeywords = ['aerobic', 'hm effort', 'race pace', 'fartlek'];
-      
-      const isHard = hardKeywords.some(keyword => desc.includes(keyword));
-      const isModerate = moderateKeywords.some(keyword => desc.includes(keyword)) && !isHard;
-      
-      if (desc.includes('up,') || desc.includes('down') || desc.includes('easy,')) {
-        if (isHard) {
-          return Math.round(miles * 0.3 * 8 + miles * 0.7 * 11);
-        } else if (isModerate) {
-          return Math.round(miles * 0.3 * 8 + miles * 0.7 * 9.5);
-        }
-      }
-      
-      if (isHard) {
-        return Math.round(miles * 11);
-      } else if (isModerate) {
-        return Math.round(miles * 9.5);
-      } else {
-        return Math.round(miles * 8);
-      }
-    }
-    
-    if (description.toLowerCase().includes('50k')) {
-      return 350;
-    }
-    if (description.toLowerCase().includes('100k')) {
-      return 600;
-    }
-    
-    return 0;
-  };
 
   const calculateStats = () => {
     const weeks = Math.ceil(data.length / 2);

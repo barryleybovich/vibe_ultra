@@ -11,6 +11,7 @@ import { TrainingPlanParser } from './components/TrainingPlanParser';
 import { TrainingStats } from './components/TrainingStats';
 import { FitnessChart } from './components/FitnessChart';
 import { Mountain, AlertCircle } from 'lucide-react';
+import { estimateTSS } from './lib/workoutUtils';
 import type { Session } from '@supabase/supabase-js';
 import {
   upsertTrainingPlan,
@@ -220,55 +221,10 @@ function App() {
     let currentFatigue = initialFatigue;
     
     // Helper function to estimate TSS (duplicate from TrainingPlanParser)
-    const estimateTSS = (training: string, description: string, weekIndex: number, dayIndex: number): number => {
+    const getEffectiveTSS = (training: string, description: string, weekIndex: number, dayIndex: number): number => {
       const workoutKey = `${weekIndex}-${dayIndex}`;
       const actualTSS = actualTSSData[workoutKey];
-      if (actualTSS !== undefined) {
-        return actualTSS;
-      }
-      
-      if (training.toLowerCase() === 'rest' || training.toLowerCase().includes('travel')) {
-        return 0;
-      }
-      
-      if (training.toLowerCase().includes('x-train') || training.toLowerCase() === 'x-train') {
-        return 22.5;
-      }
-      
-      const miles = parseFloat(training);
-      if (!isNaN(miles) && miles > 0) {
-        const desc = description.toLowerCase();
-        const hardKeywords = ['hard', 'threshold', 'tempo', '10k', '5k', 'vo2', 'fast', 'hills', 'ladder'];
-        const moderateKeywords = ['aerobic', 'hm effort', 'race pace', 'fartlek'];
-        
-        const isHard = hardKeywords.some(keyword => desc.includes(keyword));
-        const isModerate = moderateKeywords.some(keyword => desc.includes(keyword)) && !isHard;
-        
-        if (desc.includes('up,') || desc.includes('down') || desc.includes('easy,')) {
-          if (isHard) {
-            return Math.round(miles * 0.3 * 8 + miles * 0.7 * 11);
-          } else if (isModerate) {
-            return Math.round(miles * 0.3 * 8 + miles * 0.7 * 9.5);
-          }
-        }
-        
-        if (isHard) {
-          return Math.round(miles * 11);
-        } else if (isModerate) {
-          return Math.round(miles * 9.5);
-        } else {
-          return Math.round(miles * 8);
-        }
-      }
-      
-      if (description.toLowerCase().includes('50k')) {
-        return 350;
-      }
-      if (description.toLowerCase().includes('100k')) {
-        return 600;
-      }
-      
-      return 0;
+      return actualTSS !== undefined ? actualTSS : estimateTSS(training, description);
     };
     
     for (let i = 0; i < trainingData.length; i += 2) {
@@ -287,7 +243,7 @@ function App() {
       days.forEach((day, dayIndex) => {
         const training = weekRow[day] || '';
         const description = descriptionRow[day] || '';
-        const tss = estimateTSS(training, description, weekIndex, dayIndex);
+        const tss = getEffectiveTSS(training, description, weekIndex, dayIndex);
         
         const dayDate = new Date(weekStartDate);
         dayDate.setDate(weekStartDate.getDate() + dayIndex);

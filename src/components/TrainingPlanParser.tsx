@@ -2,6 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { TrendingUp, Zap, Target } from 'lucide-react';
 import { WorkoutModal } from './WorkoutModal';
+import { estimateTSS } from '../lib/workoutUtils';
 
 interface WorkoutDay {
   day: string;
@@ -45,60 +46,6 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({
     workoutKey: string;
   } | null>(null);
 
-  const estimateTSS = (training: string, description: string): number => {
-    // Handle rest days and travel
-    if (training.toLowerCase() === 'rest' || training.toLowerCase().includes('travel')) {
-      return 0;
-    }
-    
-    // Handle cross-training (estimate as moderate effort)
-    if (training.toLowerCase().includes('x-train') || training.toLowerCase() === 'x-train') {
-      return 22.5; // Cross-training session
-    }
-    
-    // Handle numeric mileage
-    const miles = parseFloat(training);
-    if (!isNaN(miles) && miles > 0) {
-      const desc = description.toLowerCase();
-      
-      // Determine intensity based on description keywords
-      const hardKeywords = ['hard', 'threshold', 'tempo', '10k', '5k', 'vo2', 'fast', 'hills', 'ladder'];
-      const moderateKeywords = ['aerobic', 'hm effort', 'race pace', 'fartlek'];
-      
-      const isHard = hardKeywords.some(keyword => desc.includes(keyword));
-      const isModerate = moderateKeywords.some(keyword => desc.includes(keyword)) && !isHard;
-      
-      // Special handling for mixed workouts (warmup/cooldown + intervals)
-      if (desc.includes('up,') || desc.includes('down') || desc.includes('easy,')) {
-        // Mixed workout - assume 30% easy, 70% at target intensity
-        if (isHard) {
-          return Math.round(miles * 0.3 * 8 + miles * 0.7 * 11);
-        } else if (isModerate) {
-          return Math.round(miles * 0.3 * 8 + miles * 0.7 * 9.5);
-        }
-      }
-      
-      // Calculate TSS based on intensity
-      if (isHard) {
-        return Math.round(miles * 11);
-      } else if (isModerate) {
-        return Math.round(miles * 9.5);
-      } else {
-        // Default to easy
-        return Math.round(miles * 8);
-      }
-    }
-    
-    // Handle special cases like races
-    if (description.toLowerCase().includes('50k')) {
-      return 350; // Estimate for 50K race
-    }
-    if (description.toLowerCase().includes('100k')) {
-      return 600; // Estimate for 100K race
-    }
-    
-    return 0;
-  };
 
   const calculateFitnessMetrics = () => {
     const allDays: Array<{

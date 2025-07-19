@@ -1,5 +1,6 @@
 import React from 'react';
 import { Calendar, Clock, TrendingUp, Zap, Target, AlertCircle } from 'lucide-react';
+import { getTodaysWorkout } from '../lib/workoutUtils';
 
 interface TodaysWorkoutProps {
   data: any[];
@@ -16,142 +17,15 @@ export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({
   initialFatigue, 
   actualTSSData 
 }) => {
-  const estimateTSS = (training: string, description: string): number => {
-    if (training.toLowerCase() === 'rest' || training.toLowerCase().includes('travel')) {
-      return 0;
-    }
-    
-    if (training.toLowerCase().includes('x-train') || training.toLowerCase() === 'x-train') {
-      return 22.5;
-    }
-    
-    const miles = parseFloat(training);
-    if (!isNaN(miles) && miles > 0) {
-      const desc = description.toLowerCase();
-      const hardKeywords = ['hard', 'threshold', 'tempo', '10k', '5k', 'vo2', 'fast', 'hills', 'ladder'];
-      const moderateKeywords = ['aerobic', 'hm effort', 'race pace', 'fartlek'];
-      
-      const isHard = hardKeywords.some(keyword => desc.includes(keyword));
-      const isModerate = moderateKeywords.some(keyword => desc.includes(keyword)) && !isHard;
-      
-      if (desc.includes('up,') || desc.includes('down') || desc.includes('easy,')) {
-        if (isHard) {
-          return Math.round(miles * 0.3 * 8 + miles * 0.7 * 11);
-        } else if (isModerate) {
-          return Math.round(miles * 0.3 * 8 + miles * 0.7 * 9.5);
-        }
-      }
-      
-      if (isHard) {
-        return Math.round(miles * 11);
-      } else if (isModerate) {
-        return Math.round(miles * 9.5);
-      } else {
-        return Math.round(miles * 8);
-      }
-    }
-    
-    if (description.toLowerCase().includes('50k')) {
-      return 350;
-    }
-    if (description.toLowerCase().includes('100k')) {
-      return 600;
-    }
-    
-    return 0;
-  };
 
-  const getTodaysWorkout = () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    let currentFitness = initialFitness;
-    let currentFatigue = initialFatigue;
-    let dayIndex = 0;
-    
-    // Find today's workout and calculate fitness metrics
-    for (let i = 0; i < data.length; i += 2) {
-      const weekRow = data[i];
-      const descriptionRow = data[i + 1];
-      
-      if (!weekRow || !descriptionRow) continue;
-      
-      // Calculate week start date based on plan start date and week index
-      const weekIndex = Math.floor(i / 2);
-      const weekStartDate = new Date(planStartDate);
-      weekStartDate.setDate(planStartDate.getDate() + (weekIndex * 7));
-      
-      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-      
-      for (let dayIndex = 0; dayIndex < days.length; dayIndex++) {
-        const day = days[dayIndex];
-        const dayDate = new Date(weekStartDate);
-        dayDate.setDate(weekStartDate.getDate() + dayIndex);
-        dayDate.setHours(0, 0, 0, 0);
-        
-        const training = weekRow[day] || '';
-        const description = descriptionRow[day] || '';
-        const plannedTSS = estimateTSS(training, description);
-        const workoutKey = `${weekIndex}-${dayIndex}`;
-        const actualTSS = actualTSSData[workoutKey];
-        const effectiveTSS = actualTSS ?? plannedTSS;
-        
-        // Update fitness metrics
-        const fitnessAlpha = 2 / (42 + 1);
-        const fatigueAlpha = 2 / (7 + 1);
-        
-        currentFitness = currentFitness + fitnessAlpha * (effectiveTSS - currentFitness);
-        currentFatigue = currentFatigue + fatigueAlpha * (effectiveTSS - currentFatigue);
-        
-        const form = currentFatigue > 0 ? (currentFitness - currentFatigue) / currentFitness
-          : 0;
-        
-        if (dayDate.getTime() === today.getTime()) {
-          return {
-            found: true,
-            day: day,
-            date: dayDate,
-            training,
-            description,
-            plannedTSS,
-            actualTSS,
-            effectiveTSS,
-            fitness: currentFitness,
-            fatigue: currentFatigue,
-            form,
-            weekNumber: weekRow['Week #'] || '',
-            weekOf: weekStartDate.toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric' 
-            })
-          };
-        }
-      }
-    }
-    
-    // Check if today is before or after the plan
-    const planStart = new Date(planStartDate);
-    planStart.setHours(0, 0, 0, 0);
-    
-    if (today < planStart) {
-      return { found: false, status: 'before' };
-    }
-    
-    // Calculate plan end date
-    const totalWeeks = Math.ceil(data.length / 2);
-    const planEnd = new Date(planStartDate);
-    planEnd.setDate(planStartDate.getDate() + (totalWeeks * 7) - 1); // Last day of last week
-    planEnd.setHours(0, 0, 0, 0);
-    
-    if (today > planEnd) {
-      return { found: false, status: 'after' };
-    }
-    
-    return { found: false, status: 'unknown' };
-  };
 
-  const todaysWorkout = getTodaysWorkout();
+  const todaysWorkout = getTodaysWorkout({
+    data,
+    planStartDate,
+    initialFitness,
+    initialFatigue,
+    actualTSSData
+  });
   
   const getTrainingTypeColor = (training: string): string => {
     if (training.toLowerCase().includes('x-train') || training.toLowerCase() === 'x-train') {
@@ -173,7 +47,6 @@ export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({
     return (
       <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg shadow-md border border-gray-300 p-6 mb-8">
         <div className="flex items-center mb-4">
-          <Calendar className="w-8 h-8 text-gray-600 mr-3" />
           <h2 className="text-2xl font-bold text-gray-900">Today's Workout</h2>
         </div>
         
