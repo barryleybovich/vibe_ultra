@@ -56,6 +56,13 @@ CREATE POLICY "Users can update their own profile."
   TO authenticated
   USING (auth.uid() = id);
 
+CREATE POLICY "Users can insert their own profile."
+  ON profiles
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = id);
+
+
 -- Create user_training_plans table
 CREATE TABLE IF NOT EXISTS user_training_plans (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
