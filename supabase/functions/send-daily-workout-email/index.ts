@@ -404,7 +404,7 @@ serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            transactionalId: 'daily-workout',
+            transactionalId: 'cmd9q4yam4f9q0o0ib9eu6he1',
             email: subscriber.email,
             dataVariables: {
               html: emailHTML,
