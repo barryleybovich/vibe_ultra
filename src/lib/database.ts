@@ -3,8 +3,10 @@ import { supabase } from './supabase';
 export async function subscribeToEmails(userId: string) {
   return supabase
     .from('profiles')
-    .update({ subscribed_to_emails: true, updated_at: new Date().toISOString() })
-    .eq('id', userId);
+    .upsert(
+      { id: userId, subscribed_to_emails: true, updated_at: new Date().toISOString() },
+      { onConflict: 'id' }
+    );
 }
 
 export async function unsubscribeFromEmails(userId: string) {
