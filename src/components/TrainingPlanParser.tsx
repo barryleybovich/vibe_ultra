@@ -310,7 +310,11 @@ export const TrainingPlanParser: React.FC<TrainingPlanParserProps> = ({
                       >
                         <div className="text-center mb-2">
                           <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getTrainingTypeColor(workout.training)}`}>
-                            {workout.training}
+                            {workout.training ? (
+                              !isNaN(Number(workout.training)) 
+                                ? `${workout.training} miles`
+                                : workout.training
+                            ) : '-'}
                           </span>
                           <div className="mt-1 space-y-1">
                             {(plannedTSS > 0 || hasActualTSS) && (

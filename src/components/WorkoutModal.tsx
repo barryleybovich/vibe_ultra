@@ -99,7 +99,11 @@ export const WorkoutModal: React.FC<WorkoutModalProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Training:</span>
                 <span className={`px-3 py-1 text-sm font-medium rounded-full border ${getTrainingTypeColor(workout.training)}`}>
-                  {workout.training || 'Rest'}
+                  {workout.training ? (
+                    !isNaN(Number(workout.training)) 
+                      ? `${workout.training} miles`
+                      : workout.training
+                  ) : 'Rest'}
                 </span>
               </div>
               {workout.description && (

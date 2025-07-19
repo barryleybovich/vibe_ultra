@@ -100,7 +100,11 @@ export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Training:</span>
               <span className={`px-3 py-1 text-sm font-medium rounded-full border ${getTrainingTypeColor(todaysWorkout.training)}`}>
-                {todaysWorkout.training || 'Rest'}
+                {todaysWorkout.training ? (
+                  !isNaN(Number(todaysWorkout.training)) 
+                    ? `${todaysWorkout.training} miles`
+                    : todaysWorkout.training
+                ) : 'Rest'}
               </span>
             </div>
             
