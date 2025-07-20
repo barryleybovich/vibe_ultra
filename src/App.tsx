@@ -10,6 +10,7 @@ import { TodaysWorkout } from './components/TodaysWorkout';
 import { TrainingPlanParser } from './components/TrainingPlanParser';
 import { TrainingStats } from './components/TrainingStats';
 import { FitnessChart } from './components/FitnessChart';
+import { CalendarExport } from './components/CalendarExport';
 import { Mountain, AlertCircle } from 'lucide-react';
 import { estimateTSS } from './lib/workoutUtils';
 import type { Session } from '@supabase/supabase-js';
@@ -348,6 +349,12 @@ function App() {
           ) : (
             <div className="space-y-8">
               <FitnessChart data={generateChartData()} />
+              
+              <CalendarExport 
+                data={trainingData}
+                planStartDate={planStartDate}
+                actualTSSData={actualTSSData}
+              />
               
               <EmailSubscription 
                 session={session}
