@@ -30,7 +30,7 @@ export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({
         .from('profiles')
         .select('subscribed_to_emails')
         .eq('id', session.user.id)
-        .single();
+        .maybeSingle();
       if (!error && data) {
         setSubscribed(data.subscribed_to_emails);
       }
