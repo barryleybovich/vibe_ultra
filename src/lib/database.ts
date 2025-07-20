@@ -5,7 +5,7 @@ export async function subscribeToEmails(userId: string) {
     .from('profiles')
     .select('id')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
 
   if (selectError && selectError.code !== 'PGRST116') {
     return { error: selectError };
