@@ -8,20 +8,22 @@ import {
 import { AuthForm } from './AuthForm';
 import type { Session } from '@supabase/supabase-js';
 
+const PENDING_SUBSCRIBE_KEY = 'auto_subscribe_pending';
+
 interface EmailSubscriptionProps {
   session: Session | null;
   onAuthSuccess: () => void;
 }
 
-export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({ 
-  session, 
-  onAuthSuccess 
+export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({
+  session,
+  onAuthSuccess
 }) => {
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
- useEffect(() => {
+  useEffect(() => {
     const fetchStatus = async () => {
       if (!session) return;
       const { data, error } = await supabase
@@ -31,6 +33,13 @@ export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({
         .single();
       if (!error && data) {
         setSubscribed(data.subscribed_to_emails);
+      }
+        if (localStorage.getItem(PENDING_SUBSCRIBE_KEY) === 'true') {
+        localStorage.removeItem(PENDING_SUBSCRIBE_KEY);
+        const { error: subErr } = await subscribeToEmails(session.user.id);
+        if (!subErr) {
+          setSubscribed(true);
+        }
       }
     };
     fetchStatus();
