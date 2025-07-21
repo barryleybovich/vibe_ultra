@@ -14,7 +14,6 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
     const nextSaturday = new Date(today);
     nextSaturday.setDate(today.getDate() + daysUntilSaturday);
 
-  return `${year}-${month}-${day}`;
     // Format as YYYY-MM-DD in local time
     const year = nextSaturday.getFullYear();
     const month = String(nextSaturday.getMonth() + 1).padStart(2, '0'); // Months are 0-based
