@@ -37,12 +37,11 @@ export function generateICSContent(events: CalendarEvent[]): string {
       `DTEND:${formatDate(event.endDate)}`,
       `SUMMARY:${escapeText(event.title)}`,
       `DESCRIPTION:${escapeText(event.description)}`,
-      event.location ? `LOCATION:${escapeText(event.location)}` : '',
       `DTSTAMP:${formatDate(new Date())}`,
       'STATUS:CONFIRMED',
       'TRANSP:OPAQUE',
       'END:VEVENT'
-    ].filter(line => line).join('\r\n');
+    ].join('\r\n');
   });
 
   icsContent += '\r\nEND:VCALENDAR';
@@ -88,11 +87,17 @@ export function openGoogleCalendarBulk(events: CalendarEvent[]): void {
   
   // Show instructions to user
   alert(
-    'ICS file downloaded! To import into Google Calendar:\n\n' +
+    'ICS file downloaded! Import instructions:\n\n' +
+    'Google Calendar:\n' +
     '1. Open Google Calendar\n' +
-    '2. Click the "+" next to "Other calendars"\n' +
+    '2. Click "+" next to "Other calendars"\n' +
     '3. Select "Import"\n' +
-    '4. Choose the downloaded training-plan.ics file\n' +
-    '5. Select your calendar and click "Import"'
+    '4. Choose the downloaded file\n\n' +
+    'Apple Calendar:\n' +
+    '1. Double-click the .ics file\n' +
+    '2. Choose which calendar to add events to\n\n' +
+    'Outlook:\n' +
+    '1. File > Open & Export > Import/Export\n' +
+    '2. Choose "Import an iCalendar (.ics) file"'
   );
 }
