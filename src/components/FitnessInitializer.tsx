@@ -15,8 +15,8 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
   const getNextSaturday = () => {
     const today = new Date();
     const dayOfWeek = today.getDay();
-        // Calculate days until next Saturday (0=Sun,...6=Sat)
-    const daysUntilSaturday = dayOfWeek <= 6 ? (6 - dayOfWeek) : 0;
+    // Calculate days until next Saturday (0=Sun,...6=Sat)
+    const daysUntilSaturday = 6 - dayOfWeek >= 0 ? 6 - dayOfWeek : 0;
     const nextSaturday = new Date(today);
     nextSaturday.setDate(today.getDate() + daysUntilSaturday);
 
@@ -30,8 +30,9 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
   };
 
   const suggestedDate = getNextSaturday();
+  
   useEffect(() => {
-    setSelectedDate(suggestedRaceDate);
+    setSelectedRaceDate(suggestedDate);
   }, [suggestedDate]);
   
   const handleSubmit = (e: React.FormEvent) => {
