@@ -47,6 +47,9 @@ export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({
 
   const handleSubscribe = async () => {
     if (!session) {
+      // Remember that the user intended to subscribe so we can
+      // automatically complete the action after email confirmation
+      localStorage.setItem(PENDING_SUBSCRIBE_KEY, 'true');
       setShowAuthForm(true);
       return;
     }
