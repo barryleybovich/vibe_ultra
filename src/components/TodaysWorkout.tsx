@@ -79,7 +79,7 @@ export const TodaysWorkout: React.FC<TodaysWorkoutProps> = ({
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Today's Workout</h2>
           <p className="text-gray-600">
-            {todaysWorkout.day}, {todaysWorkout.date.toLocaleDateString('en-US', { 
+            {todaysWorkout.date.toLocaleDateString('en-US', { 
               weekday: 'long', 
               year: 'numeric', 
               month: 'long', 
