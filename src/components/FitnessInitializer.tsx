@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { TrendingUp, Zap, Target, Info, Calendar } from 'lucide-react';
 
 interface FitnessInitializerProps {
@@ -6,12 +6,6 @@ interface FitnessInitializerProps {
 }
 
 export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitialize }) => {
-  const [fitness, setFitness] = useState<string>('45');
-  const [fatigue, setFatigue] = useState<string>('55');
-  const [selectedRaceDate, setSelectedRaceDate] = useState<string>('');
-
-
-  
   const getNextSaturday = () => {
     const today = new Date();
     const dayOfWeek = today.getDay();
@@ -29,11 +23,9 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
     return `${year}-${month}-${day}`;
   };
 
-  const suggestedDate = getNextSaturday();
-  
-  useEffect(() => {
-    setSelectedRaceDate(suggestedDate);
-  }, [suggestedDate]);
+  const [fitness, setFitness] = useState<string>('45');
+  const [fatigue, setFatigue] = useState<string>('55');
+  const [selectedRaceDate, setSelectedRaceDate] = useState<string>(() => getNextSaturday());
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
