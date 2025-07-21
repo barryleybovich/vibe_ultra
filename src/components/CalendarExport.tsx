@@ -47,13 +47,7 @@ export const CalendarExport: React.FC<CalendarExportProps> = ({
         const workoutDate = new Date(weekStartDate);
         workoutDate.setDate(weekStartDate.getDate() + dayIndex);
 
-        // For all-day events, we just need the date
-    // Parse the selected date as a local date to avoid timezone shifts
-    // when the browser is not running in UTC. The plain YYYY-MM-DD string
-    // from the date input is interpreted as UTC, which can result in the
-    // day being off by one. Appending a time portion ensures the value is
-    // treated as local time.
-    const startDate = new Date(`${selectedDate}T00:00:00`);
+        const startDate = new Date(workoutDate);
         startDate.setHours(0, 0, 0, 0);
         
         // End date for all-day events should be the next day
