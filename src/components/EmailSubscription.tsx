@@ -13,11 +13,13 @@ const PENDING_SUBSCRIBE_KEY = 'auto_subscribe_pending';
 interface EmailSubscriptionProps {
   session: Session | null;
   onAuthSuccess: () => void;
+  onSubscribed?: () => void;
 }
 
 export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({
   session,
-  onAuthSuccess
+  onAuthSuccess,
+  onSubscribed
 }) => {
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
@@ -33,12 +35,16 @@ export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({
         .maybeSingle();
       if (!error && data) {
         setSubscribed(data.subscribed_to_emails);
+        if (data.subscribed_to_emails) {
+          onSubscribed?.();
+        }
       }
         if (localStorage.getItem(PENDING_SUBSCRIBE_KEY) === 'true') {
         localStorage.removeItem(PENDING_SUBSCRIBE_KEY);
         const { error: subErr } = await subscribeToEmails(session.user.id);
         if (!subErr) {
           setSubscribed(true);
+          onSubscribed?.();
         }
       }
     };
@@ -61,6 +67,7 @@ export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({
       const { error } = await subscribeToEmails(session.user.id);
       if (error) throw error;
       setSubscribed(true);
+      onSubscribed?.();
     } catch (err) {
       setError('Failed to subscribe to email notifications');
     } finally {
