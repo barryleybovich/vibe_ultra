@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Calendar, Download, ExternalLink, Clock, MapPin } from 'lucide-react';
+import { Calendar, Download } from 'lucide-react';
 import { estimateTSS } from '../lib/workoutUtils';
 import { 
   generateICSContent, 
   downloadICSFile, 
-  openGoogleCalendarBulk,
   type CalendarEvent 
 } from '../lib/calendarExport';
 
@@ -20,8 +19,6 @@ export const CalendarExport: React.FC<CalendarExportProps> = ({
   actualTSSData
 }) => {
   const [isExporting, setIsExporting] = useState(false);
-  const [workoutTime, setWorkoutTime] = useState('07:00');
-  const [workoutDuration, setWorkoutDuration] = useState(60);
 
   const generateCalendarEvents = (): CalendarEvent[] => {
     const events: CalendarEvent[] = [];
@@ -50,43 +47,33 @@ export const CalendarExport: React.FC<CalendarExportProps> = ({
         const workoutDate = new Date(weekStartDate);
         workoutDate.setDate(weekStartDate.getDate() + dayIndex);
 
-        // Set workout time
-        const [hours, minutes] = workoutTime.split(':').map(Number);
+        // For all-day events, we just need the date
         const startDate = new Date(workoutDate);
-        startDate.setHours(hours, minutes, 0, 0);
-
-        // Calculate end time based on workout type and duration
-        const endDate = new Date(startDate);
-        let duration = workoutDuration;
+        startDate.setHours(0, 0, 0, 0);
+        
+        // End date for all-day events should be the next day
+        const endDate = new Date(workoutDate);
+        endDate.setDate(workoutDate.getDate() + 1);
+        endDate.setHours(0, 0, 0, 0);
 
         let title = 'Rest day';
         
         if (training && training.toLowerCase() !== 'rest') {
-          // Adjust duration based on workout type
           if (training.toLowerCase().includes('x-train')) {
-            duration = Math.min(duration, 45); // Cross-training typically shorter
             title = 'Cross Training';
           } else {
             const miles = parseFloat(training);
             if (!isNaN(miles) && miles > 0) {
-              // Estimate duration based on mileage (assuming 8-10 min/mile pace)
-              duration = Math.max(miles * 9, 30); // At least 30 minutes
               title = `${training} mile run`;
             } else {
               title = training;
             }
           }
-        } else {
-          // Rest days get shorter duration
-          duration = 30;
         }
-
-        endDate.setMinutes(startDate.getMinutes() + duration);
 
         const plannedTSS = estimateTSS(training, description);
         const workoutKey = `${weekIndex}-${dayIndex}`;
         const actualTSS = actualTSSData[workoutKey];
-        const effectiveTSS = actualTSS ?? plannedTSS;
 
         let eventDescription = '';
         if (description) {
@@ -129,87 +116,23 @@ export const CalendarExport: React.FC<CalendarExportProps> = ({
     }
   };
 
-  const eventCount = generateCalendarEvents().length;
-
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-      <div className="flex items-center mb-4">
-        <Calendar className="w-6 h-6 text-blue-600 mr-3" />
-        <h3 className="text-lg font-semibold text-gray-900">Export to Calendar</h3>
-      </div>
-
-      <p className="text-gray-600 mb-6">
-        Export your training plan to your calendar app. This will create {eventCount} events (including rest days).
-      </p>
-
-      <div className="space-y-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-              <Clock className="w-4 h-4 mr-2 text-blue-600" />
-              Default Workout Time
-            </label>
-            <input
-              type="time"
-              value={workoutTime}
-              onChange={(e) => setWorkoutTime(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              When to schedule workouts each day
-            </p>
-          </div>
-
-          <div>
-            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-              <Clock className="w-4 h-4 mr-2 text-blue-600" />
-              Default Duration (minutes)
-            </label>
-            <input
-              type="number"
-              value={workoutDuration}
-              onChange={(e) => setWorkoutDuration(Number(e.target.value))}
-              min="15"
-              max="300"
-              step="15"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Duration will be adjusted based on workout type
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-center">
-        <button
-          onClick={handleExportICS}
-          disabled={isExporting}
-          className="flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
-        >
-          {isExporting ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Generating Calendar File...
-            </>
-          ) : (
-            <>
-              <Download className="w-4 h-4 mr-2" />
-              Export to Calendar (.ics)
-            </>
-          )}
-        </button>
-      </div>
-
-      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-        <h4 className="font-medium text-blue-900 mb-2">Import Instructions:</h4>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li><strong>Google Calendar:</strong> Settings → Import & Export → Import → Select file</li>
-          <li><strong>Apple Calendar:</strong> Double-click the downloaded .ics file</li>
-          <li><strong>Outlook:</strong> File → Open & Export → Import/Export → Import iCalendar file</li>
-          <li><strong>Note:</strong> All training days and rest days are included in the export</li>
-        </ul>
-      </div>
-    </div>
+    <button
+      onClick={handleExportICS}
+      disabled={isExporting}
+      className="flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
+    >
+      {isExporting ? (
+        <>
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+          Exporting...
+        </>
+      ) : (
+        <>
+          <Calendar className="w-4 h-4 mr-2" />
+          Export Calendar
+        </>
+      )}
+    </button>
   );
 };

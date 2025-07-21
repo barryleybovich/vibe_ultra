@@ -296,12 +296,21 @@ function App() {
             <div className="flex items-center space-x-4">
               {session && <AuthStatus user={session.user} />}
               {trainingData.length > 0 && (
-                <button
-                  onClick={handleReset}
-                  className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200"
-                >
-                  Upload New Plan
-                </button>
+                <div className="flex items-center space-x-3">
+                  {fitnessInitialized && planStartDate && (
+                    <CalendarExport 
+                      data={trainingData}
+                      planStartDate={planStartDate}
+                      actualTSSData={actualTSSData}
+                    />
+                  )}
+                  <button
+                    onClick={handleReset}
+                    className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+                  >
+                    Upload New Plan
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -349,12 +358,6 @@ function App() {
           ) : (
             <div className="space-y-8">
               <FitnessChart data={generateChartData()} />
-              
-              <CalendarExport 
-                data={trainingData}
-                planStartDate={planStartDate}
-                actualTSSData={actualTSSData}
-              />
               
               <EmailSubscription 
                 session={session}

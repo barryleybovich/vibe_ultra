@@ -7,8 +7,11 @@ export interface CalendarEvent {
 }
 
 export function generateICSContent(events: CalendarEvent[]): string {
-  const formatDate = (date: Date): string => {
-    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const formatDateOnly = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}${month}${day}`;
   };
 
   const escapeText = (text: string): string => {
@@ -33,11 +36,11 @@ export function generateICSContent(events: CalendarEvent[]): string {
     icsContent += '\r\n' + [
       'BEGIN:VEVENT',
       `UID:${uid}`,
-      `DTSTART:${formatDate(event.startDate)}`,
-      `DTEND:${formatDate(event.endDate)}`,
+      `DTSTART;VALUE=DATE:${formatDateOnly(event.startDate)}`,
+      `DTEND;VALUE=DATE:${formatDateOnly(event.endDate)}`,
       `SUMMARY:${escapeText(event.title)}`,
       `DESCRIPTION:${escapeText(event.description)}`,
-      `DTSTAMP:${formatDate(new Date())}`,
+      `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'}`,
       'STATUS:CONFIRMED',
       'TRANSP:OPAQUE',
       'END:VEVENT'
