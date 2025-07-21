@@ -166,19 +166,28 @@ function App() {
     localStorage.removeItem(STORAGE_KEYS.ACTUAL_TSS_DATA);
   };
 
-  const handleFitnessInitialize = (fitness: number, fatigue: number, startDate: Date) => {
+  const handleFitnessInitialize = (fitness: number, fatigue: number, raceDate: Date) => {
     setInitialFitness(fitness);
     setInitialFatigue(fatigue);
+    
+    const totalWeeks = Math.ceil(trainingData.length / 2);
+    const startDate = new Date(raceDate);
+    const raceDay = startDate.getDay();
+    const diffToMonday = raceDay === 0 ? 6 : raceDay - 1;
+    startDate.setDate(startDate.getDate() - diffToMonday - (totalWeeks - 1) * 7);
+    startDate.setHours(0, 0, 0, 0);
+
     setPlanStartDate(startDate);
     setFitnessInitialized(true);
-     if (session) {
+    if (session) {
       upsertFitnessSettings(
         session.user.id,
         fitness,
         fatigue,
         startDate.toISOString().split('T')[0]
       );
-    } };
+    }
+  };
 
   const handleActualTSSUpdate = (workoutKey: string, actualTSS: number | null) => {
     setActualTSSData(prev => {
