@@ -129,7 +129,7 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
             required
           />
           <p className="text-xs text-gray-500 mt-1">
-            For best results, please select a Saturday as your starting date.
+            For best results, please select a Saturday as your race date.
           </p>
         </div>
 
