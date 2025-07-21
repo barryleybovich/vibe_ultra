@@ -106,24 +106,6 @@ export const FitnessChart: React.FC<FitnessChartProps> = ({ data }) => {
         </ResponsiveContainer>
       </div>
       
-      <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-          <span className="text-gray-600">Fitness (CTL)</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-          <span className="text-gray-600">Fatigue (ATL)</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-          <span className="text-gray-600">Form Ratio</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
-          <span className="text-gray-600">Daily TSS</span>
-        </div>
-      </div>
     </div>
   );
 };
