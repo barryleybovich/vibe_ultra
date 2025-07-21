@@ -76,6 +76,14 @@ export function getTodaysWorkout({
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // Check if today is before the plan starts
+  const planStart = new Date(planStartDate);
+  planStart.setHours(0, 0, 0, 0);
+  
+  if (today < planStart) {
+    return { found: false, status: 'before' };
+  }
+
   let currentFitness = initialFitness;
   let currentFatigue = initialFatigue;
 
@@ -135,11 +143,6 @@ export function getTodaysWorkout({
       }
     }
   }
-
-  const planStart = new Date(planStartDate);
-  planStart.setHours(0, 0, 0, 0);
-
-  if (today < planStart) return { found: false, status: 'before' };
 
   const totalWeeks = Math.ceil(data.length / 2);
   const planEnd = new Date(planStartDate);
