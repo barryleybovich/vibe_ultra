@@ -2,52 +2,44 @@ import React, { useState, useEffect } from 'react';
 import { TrendingUp, Zap, Target, Info, Calendar } from 'lucide-react';
 
 interface FitnessInitializerProps {
-  onInitialize: (fitness: number, fatigue: number, startDate: Date) => void;
+  onInitialize: (fitness: number, fatigue: number, raceDate: Date) => void;
 }
 
 export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitialize }) => {
   const [fitness, setFitness] = useState<string>('45');
   const [fatigue, setFatigue] = useState<string>('55');
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedRaceDate, setSelectedRaceDate] = useState<string>('');
 
 
   
-  const getNextMonday = () => {
+  const getNextSaturday = () => {
     const today = new Date();
     const dayOfWeek = today.getDay();
-    // Calculate days until next Monday
-    // Sunday = 0, Monday = 1, Tuesday = 2, ..., Saturday = 6
-    let daysUntilMonday;
-    if (dayOfWeek === 0) { // Sunday
-      daysUntilMonday = 1;
-    } else if (dayOfWeek === 1) { // Monday
-      daysUntilMonday = 0; // Next Monday is 7 days away
-    } else { // Tuesday through Saturday
-      daysUntilMonday = 8 - dayOfWeek;
-    }
-    const nextMonday = new Date(today);
-    nextMonday.setDate(today.getDate() + daysUntilMonday);
-    
-    
-   // Format as YYYY-MM-DD in local time
-  const year = nextMonday.getFullYear();
-  const month = String(nextMonday.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-  const day = String(nextMonday.getDate()).padStart(2, '0');
+        // Calculate days until next Saturday (0=Sun,...6=Sat)
+    const daysUntilSaturday = dayOfWeek <= 6 ? (6 - dayOfWeek) : 0;
+    const nextSaturday = new Date(today);
+    nextSaturday.setDate(today.getDate() + daysUntilSaturday);
 
   return `${year}-${month}-${day}`;
+    // Format as YYYY-MM-DD in local time
+    const year = nextSaturday.getFullYear();
+    const month = String(nextSaturday.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(nextSaturday.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   };
 
-  const suggestedDate = getNextMonday();
+  const suggestedDate = getNextSaturday();
   useEffect(() => {
-  setSelectedDate(suggestedDate);
-}, [suggestedDate]);
+    setSelectedDate(suggestedRaceDate);
+  }, [suggestedDate]);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const fitnessValue = parseFloat(fitness) || 50;
     const fatigueValue = parseFloat(fatigue) || 30;
-    const startDate = new Date(selectedDate);
-    onInitialize(fitnessValue, fatigueValue, startDate);
+    const raceDate = new Date(selectedRaceDate);
+    onInitialize(fitnessValue, fatigueValue, raceDate);
   };
 
   return (
@@ -60,7 +52,7 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
         </div>
         <h3 className="text-2xl font-bold text-gray-900 mb-2">Setup Training Plan</h3>
         <p className="text-gray-600">
-          Configure your fitness baseline and plan start date
+          Configure your fitness baseline and race date
         </p>
       </div>
 
@@ -73,7 +65,7 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
               <li><strong>Fitness:</strong> 42-day trailing average of daily TSS (chronic training load)</li>
               <li><strong>Fatigue:</strong> 7-day trailing average of daily TSS (acute training load)</li>
               <li><strong>Form:</strong> (Fitness - Fatigue)/Fitness ratio (readiness to perform)</li>
-              <li><strong>Start Date:</strong> Training plans should begin on a Monday for proper week alignment</li>
+              <li><strong>Race Date:</strong> Plans will work backwards from this date</li>
             </ul>
           </div>
         </div>
@@ -135,24 +127,24 @@ export const FitnessInitializer: React.FC<FitnessInitializerProps> = ({ onInitia
         <div>
           <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
             <Calendar className="w-4 h-4 mr-2 text-blue-600" />
-            Plan Start Date
+            Race Date
           </label>
           <input
             type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
+            value={selectedRaceDate}
+            onChange={(e) => setSelectedRaceDate(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
           />
           <p className="text-xs text-gray-500 mt-1">
-            For best results, please select a Monday as your starting date.
+            For best results, please select a Saturday as your starting date.
           </p>
         </div>
 
 
         <button
           type="submit"
-          disabled={!selectedDate}
+          disabled={!selectedRaceDate}
           className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
         >
           Start Training Plan
