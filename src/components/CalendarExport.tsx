@@ -45,6 +45,11 @@ export const CalendarExport: React.FC<CalendarExportProps> = ({
         // Skip empty days or rest days
         if (!training || training.toLowerCase() === 'rest') {
           return;
+        }
+
+        const workoutDate = new Date(weekStartDate);
+        workoutDate.setDate(weekStartDate.getDate() + dayIndex);
+
         // Set workout time
         const [hours, minutes] = workoutTime.split(':').map(Number);
         const startDate = new Date(workoutDate);
