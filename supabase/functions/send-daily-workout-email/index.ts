@@ -196,8 +196,8 @@ function generateEmailHTML(workout: WorkoutData, userEmail: string): string {
             <p style="margin:0 0 8px;"><strong>Training:</strong> ${workout.training || 'Rest'}</p>
             ${workout.plannedTSS > 0 || workout.actualTSS !== undefined ? `
             <p style="margin:0 0 8px;"><strong>TSS:</strong> ${workout.actualTSS !== undefined ? `${workout.actualTSS} (planned ${workout.plannedTSS})` : workout.plannedTSS}</p>` : ``}
-            <p style="margin:0 0 8px;"><strong>Week:</strong> ${workout.weekNumber}</p>
-            ${workout.description ? `<p style="margin:12px 0 0;">${workout.description}</p>` : ``}
+            <p style="margin:0 0 8px;">${workout.weekNumber}</p>
+            ${workout.description ? `<p style="margin:12px 0 0;"><strong>Description </strong>${workout.description}</p>` : ``}
             <div style="margin-top:16px;text-align:center;">
               <span style="display:inline-block;margin:0 8px;color:#10b981;"><strong>Fitness:</strong> ${workout.fitness?.toFixed(1)}</span>
               <span style="display:inline-block;margin:0 8px;color:#ef4444;"><strong>Fatigue:</strong> ${workout.fatigue?.toFixed(1)}</span>
