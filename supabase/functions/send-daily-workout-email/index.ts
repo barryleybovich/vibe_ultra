@@ -192,7 +192,7 @@ function generateEmailHTML(workout: WorkoutData, userEmail: string): string {
 <td style="background:#3b82f6;color:#ffffff;padding:16px;text-align:center;font-size:18px;font-weight:bold;">🏃‍♂️ Today's Workout - ${dateString}</td>
         </tr>
         <tr>
-          <td style="padding:24px;font-size:14px;line-height:1.4;color:#374151;">
+          <td style="padding:24px;font-size:14px;color:#374151;">
             <p style="margin:0 0 8px;"><strong>Training:</strong> ${workout.training || 'Rest'}</p>
             ${workout.plannedTSS > 0 || workout.actualTSS !== undefined ? `
             <p style="margin:0 0 8px;"><strong>TSS:</strong> ${workout.actualTSS !== undefined ? `${workout.actualTSS} (planned ${workout.plannedTSS})` : workout.plannedTSS}</p>` : ``}
