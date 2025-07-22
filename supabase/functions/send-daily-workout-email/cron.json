@@ -1,0 +1,4 @@
+{
+  "schedule": "0 5 * * *",
+  "description": "Send daily workout emails to subscribed users at 5:00 AM UTC"
+}

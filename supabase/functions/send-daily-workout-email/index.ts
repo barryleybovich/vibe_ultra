@@ -1,3 +1,6 @@
+// Cron schedule: Run daily at 5:00 AM UTC
+// This function will be invoked automatically by Supabase's cron scheduler
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
