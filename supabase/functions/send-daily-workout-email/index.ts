@@ -168,7 +168,7 @@ function generateEmailHTML(workout: WorkoutData, userEmail: string): string {
     return `
 <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f9fafb;font-family:Arial,Helvetica,sans-serif;">
   <tr>
-    <td align="center" style="padding:20px;">
+    <td align="center" style="padding:20px;"> 
       <table width="560" cellpadding="0" cellspacing="0" role="presentation" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
         </tr>
         <tr>
