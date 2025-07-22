@@ -163,145 +163,181 @@ function generateEmailHTML(workout: WorkoutData, userEmail: string): string {
       : "No workout scheduled for today.";
 
     return `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Daily Workout Update</title>
-      </head>
-      <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f9fafb;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-          <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 30px; text-align: center;">
-            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">🏃‍♂️ Daily Workout Update</h1>
-            <p style="color: #bfdbfe; margin: 10px 0 0 0; font-size: 16px;">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-          </div>
-          <div style="padding: 40px 30px; text-align: center;">
-            <div style="background-color: #f3f4f6; border-radius: 12px; padding: 30px; margin-bottom: 30px;">
-              <h2 style="color: #374151; margin: 0 0 15px 0; font-size: 24px;">No Workout Today</h2>
-              <p style="color: #6b7280; margin: 0; font-size: 16px; line-height: 1.5;">${message}</p>
-            </div>
-          </div>
-          <div style="background-color: #f9fafb; padding: 20px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
-            <p style="color: #6b7280; margin: 0; font-size: 14px;">Keep up the great work! 💪</p>
-          </div>
-        </div>
-      </body>
-    </html>`;
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f9fafb; margin: 0; padding: 20px 0;">
+  <tr>
+    <td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;">
+        <!-- Header -->
+        <tr>
+          <td style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 30px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">🏃‍♂️ Daily Workout Update</h1>
+            <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 14px;">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          </td>
+        </tr>
+        <!-- Content -->
+        <tr>
+          <td style="padding: 30px; text-align: center;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f3f4f6; border-radius: 8px;">
+              <tr>
+                <td style="padding: 25px; text-align: center;">
+                  <h2 style="color: #374151; margin: 0 0 12px 0; font-size: 20px;">No Workout Today</h2>
+                  <p style="color: #6b7280; margin: 0; font-size: 14px; line-height: 1.4;">${message}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <p style="color: #6b7280; margin: 0; font-size: 12px;">Keep up the great work! 💪</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`;
   }
 
   return `
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Today's Workout</title>
-    </head>
-    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f9fafb;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f9fafb; margin: 0; padding: 20px 0;">
+  <tr>
+    <td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;">
         <!-- Header -->
-        <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 30px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">🏃‍♂️ Today's Workout</h1>
-          <p style="color: #bfdbfe; margin: 10px 0 0 0; font-size: 16px;">
-            ${workout.day}, ${workout.date?.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
-        </div>
-
+        <tr>
+          <td style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 25px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">🏃‍♂️ Today's Workout</h1>
+            <p style="color: #bfdbfe; margin: 8px 0 0 0; font-size: 14px;">${workout.day}, ${workout.date?.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          </td>
+        </tr>
+        
         <!-- Workout Details -->
-        <div style="padding: 30px;">
-          <div style="background-color: ${headerBg}; border-radius: 12px; padding: 25px; margin-bottom: 25px;">
-            <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 24px; text-align: center;">Workout Details</h2>
+        <tr>
+          <td style="padding: 25px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: ${headerBg}; border-radius: 8px; margin-bottom: 20px;">
+              <tr>
+                <td style="padding: 20px;">
+                  <h2 style="color: #1f2937; margin: 0 0 15px 0; font-size: 18px; text-align: center;">Workout Details</h2>
+                  
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="color: #6b7280; font-size: 14px; padding: 5px 0;">Training:</td>
+                      <td align="right" style="padding: 5px 0;">
+                        <span style="background-color: #dbeafe; color: #1e40af; padding: 4px 12px; border-radius: 12px; font-weight: 600; font-size: 14px;">
+                          ${workout.training || 'Rest'}
+                        </span>
+                      </td>
+                    </tr>
+                    ${workout.plannedTSS > 0 || workout.actualTSS !== undefined ? `
+                    <tr>
+                      <td style="color: #6b7280; font-size: 14px; padding: 5px 0;">TSS:</td>
+                      <td align="right" style="padding: 5px 0;">
+                        ${workout.actualTSS !== undefined ? `
+                          <div style="margin-bottom: 3px;">
+                            <span style="background-color: #f3f4f6; color: #6b7280; padding: 3px 8px; border-radius: 8px; font-size: 12px; text-decoration: line-through;">
+                              ${workout.plannedTSS}
+                            </span>
+                          </div>
+                          <span style="background-color: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 12px; font-weight: 600; font-size: 14px;">
+                            ${workout.actualTSS}
+                          </span>
+                        ` : `
+                          <span style="background-color: #f3f4f6; color: #374151; padding: 4px 12px; border-radius: 12px; font-weight: 600; font-size: 14px;">
+                            ${workout.plannedTSS}
+                          </span>
+                        `}
+                      </td>
+                    </tr>
+                    ` : ''}
+                    <tr>
+                      <td style="color: #6b7280; font-size: 14px; padding: 5px 0;">Week:</td>
+                      <td align="right" style="color: #1f2937; font-weight: 600; font-size: 14px; padding: 5px 0;">${workout.weekNumber}</td>
+                    </tr>
+                  </table>
+                  
+                  ${workout.description ? `
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 15px; background-color: #ffffff; border-radius: 6px; border: 1px solid #e5e7eb;">
+                    <tr>
+                      <td style="padding: 15px;">
+                        <h3 style="color: #374151; margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">Description</h3>
+                        <p style="color: #6b7280; margin: 0; font-size: 13px; line-height: 1.4;">${workout.description}</p>
+                      </td>
+                    </tr>
+                  </table>
+                  ` : ''}
+                </td>
+              </tr>
+            </table>
             
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-              <span style="color: #6b7280; font-size: 16px;">Training:</span>
-              <span style="background-color: #dbeafe; color: #1e40af; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 16px;">
-                ${workout.training || 'Rest'}
-              </span>
-            </div>
-
-            ${workout.plannedTSS > 0 || workout.actualTSS !== undefined ? `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-              <span style="color: #6b7280; font-size: 16px;">TSS:</span>
-              <div style="text-align: right;">
-                ${workout.actualTSS !== undefined ? `
-                  <div style="background-color: #f3f4f6; color: #6b7280; padding: 4px 12px; border-radius: 12px; font-size: 14px; text-decoration: line-through; margin-bottom: 5px;">
-                    Planned: ${workout.plannedTSS}
-                  </div>
-                  <div style="background-color: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 12px; font-weight: 600; font-size: 16px;">
-                    Actual: ${workout.actualTSS}
-                  </div>
-                ` : `
-                  <span style="background-color: #f3f4f6; color: #374151; padding: 6px 12px; border-radius: 12px; font-weight: 600; font-size: 16px;">
-                    ${workout.plannedTSS}
-                  </span>
-                `}
-              </div>
-            </div>
-            ` : ''}
-
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="color: #6b7280; font-size: 16px;">Week:</span>
-              <span style="color: #1f2937; font-weight: 600; font-size: 16px;">${workout.weekNumber}</span>
-            </div>
-
-            ${workout.description ? `
-            <div style="margin-top: 20px; padding: 20px; background-color: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb;">
-              <h3 style="color: #374151; margin: 0 0 10px 0; font-size: 16px; font-weight: 600;">Workout Description</h3>
-              <p style="color: #6b7280; margin: 0; font-size: 15px; line-height: 1.6;">${workout.description}</p>
-            </div>
-            ` : ''}
-          </div>
-
-          <!-- Fitness Metrics -->
-          <div style="background-color: #f9fafb; border-radius: 12px; padding: 25px;">
-            <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 20px; text-align: center;">📊 Fitness Metrics</h3>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
-              <div style="background-color: #ffffff; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                <div style="color: #10b981; font-size: 24px; font-weight: bold; margin-bottom: 5px;">
-                  ${workout.fitness?.toFixed(1)}
-                </div>
-                <div style="color: #6b7280; font-size: 12px; font-weight: 600;">FITNESS (CTL)</div>
-              </div>
-              
-              <div style="background-color: #ffffff; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                <div style="color: #ef4444; font-size: 24px; font-weight: bold; margin-bottom: 5px;">
-                  ${workout.fatigue?.toFixed(1)}
-                </div>
-                <div style="color: #6b7280; font-size: 12px; font-weight: 600;">FATIGUE (ATL)</div>
-              </div>
-              
-              <div style="background-color: #ffffff; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                <div style="color: ${formColor}; font-size: 24px; font-weight: bold; margin-bottom: 5px;">
-                  ${((workout.form || 0) * 100).toFixed(0)}%
-                </div>
-                <div style="color: #6b7280; font-size: 12px; font-weight: 600;">FORM</div>
-              </div>
-            </div>
-
-            ${isLowForm ? `
-            <div style="margin-top: 20px; padding: 15px; background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;">
-              <div style="display: flex; align-items: center;">
-                <span style="color: #dc2626; font-size: 18px; margin-right: 8px;">⚠️</span>
-                <span style="color: #dc2626; font-weight: 600; font-size: 14px;">
-                  Low form detected - consider easier training or rest
-                </span>
-              </div>
-            </div>
-            ` : ''}
-          </div>
-        </div>
-
+            <!-- Fitness Metrics -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f9fafb; border-radius: 8px;">
+              <tr>
+                <td style="padding: 20px;">
+                  <h3 style="color: #1f2937; margin: 0 0 15px 0; font-size: 16px; text-align: center;">📊 Fitness Metrics</h3>
+                  
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td width="33%" align="center" style="padding: 0 5px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 6px; border: 1px solid #e5e7eb;">
+                          <tr>
+                            <td style="padding: 12px; text-align: center;">
+                              <div style="color: #10b981; font-size: 20px; font-weight: bold; margin-bottom: 3px;">${workout.fitness?.toFixed(1)}</div>
+                              <div style="color: #6b7280; font-size: 10px; font-weight: 600;">FITNESS (CTL)</div>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                      <td width="33%" align="center" style="padding: 0 5px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 6px; border: 1px solid #e5e7eb;">
+                          <tr>
+                            <td style="padding: 12px; text-align: center;">
+                              <div style="color: #ef4444; font-size: 20px; font-weight: bold; margin-bottom: 3px;">${workout.fatigue?.toFixed(1)}</div>
+                              <div style="color: #6b7280; font-size: 10px; font-weight: 600;">FATIGUE (ATL)</div>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                      <td width="33%" align="center" style="padding: 0 5px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 6px; border: 1px solid #e5e7eb;">
+                          <tr>
+                            <td style="padding: 12px; text-align: center;">
+                              <div style="color: ${formColor}; font-size: 20px; font-weight: bold; margin-bottom: 3px;">${((workout.form || 0) * 100).toFixed(0)}%</div>
+                              <div style="color: #6b7280; font-size: 10px; font-weight: 600;">FORM</div>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                  
+                  ${isLowForm ? `
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 15px; background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 6px;">
+                    <tr>
+                      <td style="padding: 12px;">
+                        <p style="color: #dc2626; margin: 0; font-size: 12px; font-weight: 600;">
+                          ⚠️ Low form detected - consider easier training or rest
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                  ` : ''}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        
         <!-- Footer -->
-        <div style="background-color: #f9fafb; padding: 20px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
-          <p style="color: #6b7280; margin: 0; font-size: 14px;">
-            Keep up the great work! 💪 Train smart, race strong.
-          </p>
-        </div>
-      </div>
-    </body>
-  </html>`;
+        <tr>
+          <td style="background-color: #f9fafb; padding: 15px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <p style="color: #6b7280; margin: 0; font-size: 12px;">Keep up the great work! 💪 Train smart, race strong.</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`;
 }
 
 serve(async (req) => {
