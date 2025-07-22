@@ -398,7 +398,13 @@ serve(async (req) => {
 
         // Generate email HTML
         const emailHTML = generateEmailHTML(todaysWorkout, subscriber.email)
+        // Build the subject line and append "miles" when appropriate
+        let subjectTraining = todaysWorkout.training || 'Rest'
+        if (!isNaN(Number(subjectTraining)) && subjectTraining.trim() !== '') {
+          subjectTraining = `${subjectTraining} miles`
+        }
 
+        
         // Send email via Loop.so
         const loopResponse = await fetch('https://app.loops.so/api/v1/transactional', {
           method: 'POST',
@@ -412,7 +418,7 @@ serve(async (req) => {
             dataVariables: {
               html: emailHTML,
               subject: todaysWorkout.found 
-                ? `🏃‍♂️ Today's Workout: ${todaysWorkout.training || 'Rest'}`
+                ? `🏃‍♂️ Today's Workout: ${subjectTraining}`
                 : '🏃‍♂️ Daily Workout Update'
             }
           }),
