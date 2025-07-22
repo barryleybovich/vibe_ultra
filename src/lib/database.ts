@@ -78,7 +78,7 @@ export async function upsertDailyTSS(
   workoutDate: string,
   actualTss: number
 ) {
-  return supabase
+  const { data, error } = await supabase
     .from('user_daily_tss_records')
     .upsert(
       {
@@ -89,11 +89,27 @@ export async function upsertDailyTSS(
       },
       { onConflict: 'user_id, workout_date' }
     );
+  
+  if (error) {
+    console.error('Error upserting daily TSS:', error);
+  } else {
+    console.log('Successfully upserted daily TSS:', { userId, workoutDate, actualTss });
+  }
+  
+  return { data, error };
 }
 
 export async function deleteDailyTSS(userId: string, workoutDate: string) {
-  return supabase
+  const { data, error } = await supabase
     .from('user_daily_tss_records')
     .delete()
     .match({ user_id: userId, workout_date: workoutDate });
+  
+  if (error) {
+    console.error('Error deleting daily TSS:', error);
+  } else {
+    console.log('Successfully deleted daily TSS:', { userId, workoutDate });
+  }
+  
+  return { data, error };
 }

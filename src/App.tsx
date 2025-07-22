@@ -46,11 +46,15 @@ function App() {
     if (!session) return;
 
     const persistData = async () => {
+      console.log('Persisting data to Supabase for user:', session.user.id);
+      
       if (trainingData.length > 0) {
+        console.log('Upserting training plan...');
         await upsertTrainingPlan(session.user.id, 'default', trainingData);
       }
 
       if (fitnessInitialized && planStartDate) {
+        console.log('Upserting fitness settings...');
         await upsertFitnessSettings(
           session.user.id,
           initialFitness,
@@ -59,7 +63,8 @@ function App() {
         );
       }
 
-      if (planStartDate) {
+      if (planStartDate && fitnessInitialized) {
+        console.log('Upserting actual TSS data...', Object.keys(actualTSSData).length, 'records');
         for (const [workoutKey, tss] of Object.entries(actualTSSData)) {
           const [weekIndexStr, dayIndexStr] = workoutKey.split('-');
           const weekIndex = parseInt(weekIndexStr, 10);
@@ -67,13 +72,13 @@ function App() {
           const date = new Date(planStartDate);
           date.setDate(planStartDate.getDate() + weekIndex * 7 + dayIndex);
           const isoDate = date.toISOString().split('T')[0];
+          console.log('Upserting TSS record:', { workoutKey, tss, isoDate });
           await upsertDailyTSS(session.user.id, isoDate, tss);
         }
       }
     };
 
     persistData();
-  }, [session]);
 
   // Handle authentication state changes
   useEffect(() => {
@@ -234,13 +239,16 @@ function App() {
       return updated;
     });
   
-    if (session && planStartDate) {
+    // Only persist to database if user is authenticated and plan is initialized
+    if (session && planStartDate && fitnessInitialized) {
       const [weekIndexStr, dayIndexStr] = workoutKey.split('-');
       const weekIndex = parseInt(weekIndexStr, 10);
       const dayIndex = parseInt(dayIndexStr, 10);
       const date = new Date(planStartDate);
       date.setDate(planStartDate.getDate() + weekIndex * 7 + dayIndex);
       const isoDate = date.toISOString().split('T')[0];
+
+      console.log('Persisting TSS update:', { workoutKey, actualTSS, isoDate, userId: session.user.id });
 
       if (actualTSS === null) {
         deleteDailyTSS(session.user.id, isoDate);
