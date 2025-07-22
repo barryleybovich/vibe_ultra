@@ -172,7 +172,7 @@ function generateEmailHTML(workout: WorkoutData, userEmail: string): string {
       <table width="560" cellpadding="0" cellspacing="0" role="presentation" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
         </tr>
         <tr>
-          <td style="background:#3b82f6;color:#ffffff;padding:16px;text-align:center;font-size:18px;font-weight:bold;">🏃‍♂️ Daily Workout Update</td>
+          <td style="background:#3b82f6;color:#ffffff;padding:10px;text-align:center;font-size:18px;font-weight:bold;">🏃‍♂️ Daily Workout Update</td>
         </tr>
         <tr>
           <td style="padding:24px;text-align:center;font-size:14px;color:#374151;">${message}</td>
