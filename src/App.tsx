@@ -79,6 +79,7 @@ function App() {
     };
 
     persistData();
+  }, [session, trainingData, fitnessInitialized, planStartDate, initialFitness, initialFatigue, actualTSSData]);
 
   // Handle authentication state changes
   useEffect(() => {
@@ -174,6 +175,7 @@ function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.ACTUAL_TSS_DATA, JSON.stringify(actualTSSData));
   }, [actualTSSData]);
+  
   const handleDataParsed = (data: any[]) => {
     setTrainingData(data);
     setError('');
