@@ -41,6 +41,40 @@ function App() {
   const [actualTSSData, setActualTSSData] = useState<Record<string, number>>({});
   const [error, setError] = useState<string>('');
 
+    // Persist locally stored plan data to Supabase once a session exists
+  useEffect(() => {
+    if (!session) return;
+
+    const persistData = async () => {
+      if (trainingData.length > 0) {
+        await upsertTrainingPlan(session.user.id, 'default', trainingData);
+      }
+
+      if (fitnessInitialized && planStartDate) {
+        await upsertFitnessSettings(
+          session.user.id,
+          initialFitness,
+          initialFatigue,
+          planStartDate.toISOString().split('T')[0]
+        );
+      }
+
+      if (planStartDate) {
+        for (const [workoutKey, tss] of Object.entries(actualTSSData)) {
+          const [weekIndexStr, dayIndexStr] = workoutKey.split('-');
+          const weekIndex = parseInt(weekIndexStr, 10);
+          const dayIndex = parseInt(dayIndexStr, 10);
+          const date = new Date(planStartDate);
+          date.setDate(planStartDate.getDate() + weekIndex * 7 + dayIndex);
+          const isoDate = date.toISOString().split('T')[0];
+          await upsertDailyTSS(session.user.id, isoDate, tss);
+        }
+      }
+    };
+
+    persistData();
+  }, [session]);
+
   // Handle authentication state changes
   useEffect(() => {
     // Get initial session
