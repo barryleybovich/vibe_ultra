@@ -153,39 +153,29 @@ function getTodaysWorkout(data: any[], planStartDate: Date, initialFitness: numb
 function generateEmailHTML(workout: WorkoutData, userEmail: string): string {
   const isLowForm = workout.form && workout.form < -0.25;
   const formColor = isLowForm ? '#dc2626' : '#2563eb';
-  const headerBg = isLowForm ? '#fef2f2' : '#eff6ff';
-  
+
+  const dateString = workout.date
+    ? workout.date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    : new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
   if (!workout.found) {
-    const message = workout.status === 'before' 
+    const message = workout.status === 'before'
       ? "Your training plan hasn't started yet. Consider easy base training, cross-training, or rest."
       : workout.status === 'after'
       ? "Congratulations! You've completed your training plan. Time for a new challenge!"
       : "No workout scheduled for today.";
 
     return `
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f9fafb;font-family:Arial,Helvetica,sans-serif;">
   <tr>
-    <td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
-        <tr>
-          <td style="background:#3b82f6;color:#ffffff;padding:16px;text-align:center;">
-            <h1 style="margin:0;font-size:20px;">🏃‍♂️ Daily Workout Update</h1>
-            <p style="margin:4px 0 0;font-size:12px;color:#bfdbfe;">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-          </td>
+    <td align="center" style="padding:20px;">
+      <table width="560" cellpadding="0" cellspacing="0" role="presentation" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
         </tr>
         <tr>
-          <td style="padding: 30px; text-align: center;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f3f4f6; border-radius: 8px;">
-              <tr>          
-              <td style="padding:16px;text-align:center;">
-            <p style="margin:0 0 8px;font-size:16px;color:#374151;">No Workout Today</p>
-            <p style="margin:0;font-size:13px;color:#6b7280;">${message}</p>
-          </td>
+          <td style="background:#3b82f6;color:#ffffff;padding:16px;text-align:center;font-size:18px;font-weight:bold;">🏃‍♂️ Daily Workout Update</td>
         </tr>
         <tr>
-          <td style="background:#f9fafb;padding:12px;text-align:center;border-top:1px solid #e5e7eb;font-size:12px;color:#6b7280;">
-            Keep up the great work! 💪
-          </td>
+          <td style="padding:24px;text-align:center;font-size:14px;color:#374151;">${message}</td>
         </tr>
       </table>
     </td>
@@ -194,108 +184,26 @@ function generateEmailHTML(workout: WorkoutData, userEmail: string): string {
   }
 
   return `
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f9fafb;font-family:Arial,Helvetica,sans-serif;">
   <tr>
-    <td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
+    <td align="center" style="padding:20px;">
+      <table width="560" cellpadding="0" cellspacing="0" role="presentation" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
         <tr>
-          <td style="background:#3b82f6;color:#ffffff;padding:16px;text-align:center;">
-            <h1 style="margin:0;font-size:20px;">🏃‍♂️ Today's Workout</h1>
-            <p style="margin:4px 0 0;font-size:12px;color:#bfdbfe;">${workout.day}, ${workout.date?.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-          </td>
-        </tr>
-
-        <tr>
-          <td style="padding:16px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${headerBg};border-radius:6px;margin-bottom:12px;">
-              <tr>
-                <td style="padding:12px;">
-                  
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                    <tr>
-                      <td style="color:#6b7280;font-size:13px;padding:4px 0;">Training:</td>
-                      <td align="right" style="padding:4px 0;">
-                        <span style="background-color:#dbeafe;color:#1e40af;padding:3px 10px;border-radius:10px;font-weight:600;font-size:13px;">
-                          ${workout.training || 'Rest'}
-                        </span>
-                      </td>
-                    </tr>
-                    ${workout.plannedTSS > 0 || workout.actualTSS !== undefined ? `
-                    <tr>
-                      <td style="color: #6b7280; font-size: 13px; padding: 4px 0;">TSS:</td>
-                      <td align="right" style="padding: 4px 0;">
-                        ${workout.actualTSS !== undefined ? `
-                          <div style="margin-bottom: 2px;">
-                            <span style="background-color: #f3f4f6; color: #6b7280; padding: 2px 6px; border-radius: 6px; font-size: 11px; text-decoration: line-through;">
-                              ${workout.plannedTSS}
-                            </span>
-                          </div>
-                          <span style="background-color: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 10px; font-weight: 600; font-size: 13px;">
-                            ${workout.actualTSS}
-                          </span>
-                        ` : `
-                          <span style="background-color:#f3f4f6;color:#374151;padding:3px 10px;border-radius:10px;font-weight:600;font-size:13px;">
-                            ${workout.plannedTSS}
-                          </span>
-                        `}
-                      </td>
-                    </tr>
-                    ` : ``}
-                    <tr>
-                      <td style="color:#6b7280;font-size:13px;padding:4px 0;">Week:</td>
-                      <td align="right" style="color:#1f2937;font-weight:600;font-size:13px;padding:4px 0;">${workout.weekNumber}</td>
-                    </tr>
-                  </table>
-                  
-                  ${workout.description ? `
-                  <div style="margin-top:10px;padding:10px;border:1px solid #e5e7eb;border-radius:4px;background:#ffffff;">
-                    <div style="color:#374151;font-size:13px;font-weight:600;margin-bottom:4px;">Description</div>
-                    <div style="color:#6b7280;font-size:12px;line-height:1.4;">${workout.description}</div>
-                  </div>
-                  ` : ``}
-                </td>
-              </tr>
-            </table>
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f9fafb;border-radius:6px;">
-              <tr>
-                <td style="padding: 12px;">
-
-                  
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                    <tr>
-                      <td width="33%" align="center" style="padding:0 4px;">
-                        <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:4px;padding:8px;">
-                          <div style="color:#10b981;font-size:18px;font-weight:bold;margin-bottom:2px;">${workout.fitness?.toFixed(1)}</div>
-                          <div style="color:#6b7280;font-size:10px;font-weight:600;">FITNESS (CTL)</div>
-                        </div>
-                      </td>
-                      <td width="33%" align="center" style="padding:0 4px;">
-                        <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:4px;padding:8px;">
-                          <div style="color:#ef4444;font-size:18px;font-weight:bold;margin-bottom:2px;">${workout.fatigue?.toFixed(1)}</div>
-                          <div style="color:#6b7280;font-size:10px;font-weight:600;">FATIGUE (ATL)</div>
-                        </div>
-                      </td>
-                      <td width="33%" align="center" style="padding:0 4px;">
-                        <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:4px;padding:8px;">
-                          <div style="color:${formColor};font-size:18px;font-weight:bold;margin-bottom:2px;">${((workout.form || 0) * 100).toFixed(0)}%</div>
-                          <div style="color:#6b7280;font-size:10px;font-weight:600;">FORM</div>
-                        </div>
-                      </td>
-                    </tr>
-                  </table>
-                  ${isLowForm ? `
-                  <div style="margin-top:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:4px;padding:8px;color:#dc2626;font-size:12px;font-weight:600;text-align:center;">
-                    ⚠️ Low form detected - consider easier training or rest
-                  </div>
-                  ` : ``}
-                </td>
-              </tr>
-            </table>
-          </td>
+<td style="background:#3b82f6;color:#ffffff;padding:16px;text-align:center;font-size:18px;font-weight:bold;">🏃‍♂️ Today's Workout - ${dateString}</td>
         </tr>
         <tr>
-          <td style="background:#f9fafb;padding:12px;text-align:center;border-top:1px solid #e5e7eb;font-size:12px;color:#6b7280;">
-            Keep up the great work! 💪 Train smart, race strong.
+          <td style="padding:24px;font-size:14px;line-height:1.4;color:#374151;">
+            <p style="margin:0 0 8px;"><strong>Training:</strong> ${workout.training || 'Rest'}</p>
+            ${workout.plannedTSS > 0 || workout.actualTSS !== undefined ? `
+            <p style="margin:0 0 8px;"><strong>TSS:</strong> ${workout.actualTSS !== undefined ? `${workout.actualTSS} (planned ${workout.plannedTSS})` : workout.plannedTSS}</p>` : ``}
+            <p style="margin:0 0 8px;"><strong>Week:</strong> ${workout.weekNumber}</p>
+            ${workout.description ? `<p style="margin:12px 0 0;">${workout.description}</p>` : ``}
+            <div style="margin-top:16px;text-align:center;">
+              <span style="display:inline-block;margin:0 8px;color:#10b981;"><strong>Fitness:</strong> ${workout.fitness?.toFixed(1)}</span>
+              <span style="display:inline-block;margin:0 8px;color:#ef4444;"><strong>Fatigue:</strong> ${workout.fatigue?.toFixed(1)}</span>
+              <span style="display:inline-block;margin:0 8px;color:${formColor};"><strong>Form:</strong> ${((workout.form || 0) * 100).toFixed(0)}%</span>
+            </div>
+            ${isLowForm ? `<p style="margin-top:16px;color:#dc2626;text-align:center;">⚠️ Low form detected - consider easier training or rest</p>` : ``}
           </td>
         </tr>
       </table>
