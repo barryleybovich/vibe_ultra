@@ -15,6 +15,12 @@ interface LibraryPlan {
 
 const LIBRARY_PLANS: LibraryPlan[] = [
   {
+    id: 'swap-50-55',
+    name: 'SWAP 50 Mile - Peak 55 MPW',
+    description: '12-week 50-mile ultramarathon plan peaking at 55 miles per week',
+    filePath: '/plans/SWAP 50 Mile - Peak 55 MPW.csv'
+  },
+  {
     id: 'swap-50-64',
     name: 'SWAP 50 Mile - Peak 64 MPW',
     description: '12-week 50-mile ultramarathon plan peaking at 64 miles per week',
