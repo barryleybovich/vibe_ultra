@@ -314,18 +314,21 @@ serve(async (req) => {
 
         
         // Send email via Loop.so
-        const loopResponse = await fetch('https://app.loops.so/api/v1/emails/send', {
+        const loopResponse = await fetch('https://app.loops.so/api/v1/transactional', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${Deno.env.get('LOOPS_API_KEY')}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            to: subscriber.email,
-            subject: todaysWorkout.found 
-              ? `🏃‍♂️ Today's Workout: ${subjectTraining}`
-              : '🏃‍♂️ Daily Workout Update',
-            html: emailHTML
+            transactionalId: 'cmd9q4yam4f9q0o0ib9eu6he1',
+            email: subscriber.email,
+            dataVariables: {
+              html: emailHTML,
+              subject: todaysWorkout.found 
+                ? `🏃‍♂️ Today's Workout: ${subjectTraining}`
+                : '🏃‍♂️ Daily Workout Update'
+            }
           }),
         })
 
