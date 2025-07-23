@@ -52,7 +52,7 @@ serve(async (req) => {
     // Check fitness settings
     const { data: fitnessSettings, error: fitnessError } = await supabaseClient
       .from('user_fitness_settings')
-      .select('user_id, plan_start_date, created_at')
+      .select('user_id, plan_start_date, updated_at')
 
     console.log('Fitness settings:', fitnessSettings)
     console.log('Fitness error:', fitnessError)
