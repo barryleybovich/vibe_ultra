@@ -48,33 +48,59 @@ function App() {
     const persistData = async () => {
       console.log('Persisting data to Supabase for user:', session.user.id);
       
-      if (trainingData.length > 0) {
-        console.log('Upserting training plan...');
-        await upsertTrainingPlan(session.user.id, 'default', trainingData);
-      }
-
-      if (fitnessInitialized && planStartDate) {
-        console.log('Upserting fitness settings...');
-        await upsertFitnessSettings(
-          session.user.id,
-          initialFitness,
-          initialFatigue,
-          planStartDate.toISOString().split('T')[0]
-        );
-      }
-
-      if (planStartDate && fitnessInitialized) {
-        console.log('Upserting actual TSS data...', Object.keys(actualTSSData).length, 'records');
-        for (const [workoutKey, tss] of Object.entries(actualTSSData)) {
-          const [weekIndexStr, dayIndexStr] = workoutKey.split('-');
-          const weekIndex = parseInt(weekIndexStr, 10);
-          const dayIndex = parseInt(dayIndexStr, 10);
-          const date = new Date(planStartDate);
-          date.setDate(planStartDate.getDate() + weekIndex * 7 + dayIndex);
-          const isoDate = date.toISOString().split('T')[0];
-          console.log('Upserting TSS record:', { workoutKey, tss, isoDate });
-          await upsertDailyTSS(session.user.id, isoDate, tss);
+      try {
+        if (trainingData.length > 0) {
+          console.log('Upserting training plan...');
+          const { error } = await upsertTrainingPlan(session.user.id, 'default', trainingData);
+          if (error) {
+            console.error('Failed to upsert training plan:', error);
+          } else {
+            console.log('Successfully upserted training plan');
+          }
         }
+
+        if (fitnessInitialized && planStartDate) {
+          console.log('Upserting fitness settings...', {
+            userId: session.user.id,
+            initialFitness,
+            initialFatigue,
+            planStartDate: planStartDate.toISOString().split('T')[0]
+          });
+          const { error } = await upsertFitnessSettings(
+            session.user.id,
+            initialFitness,
+            initialFatigue,
+            planStartDate.toISOString().split('T')[0]
+          );
+          if (error) {
+            console.error('Failed to upsert fitness settings:', error);
+          } else {
+            console.log('Successfully upserted fitness settings');
+          }
+        }
+
+        if (planStartDate && fitnessInitialized) {
+          console.log('Upserting actual TSS data...', Object.keys(actualTSSData).length, 'records');
+          for (const [workoutKey, tss] of Object.entries(actualTSSData)) {
+            try {
+              const [weekIndexStr, dayIndexStr] = workoutKey.split('-');
+              const weekIndex = parseInt(weekIndexStr, 10);
+              const dayIndex = parseInt(dayIndexStr, 10);
+              const date = new Date(planStartDate);
+              date.setDate(planStartDate.getDate() + weekIndex * 7 + dayIndex);
+              const isoDate = date.toISOString().split('T')[0];
+              console.log('Upserting TSS record:', { workoutKey, tss, isoDate });
+              const { error } = await upsertDailyTSS(session.user.id, isoDate, tss);
+              if (error) {
+                console.error('Failed to upsert TSS record:', { workoutKey, tss, isoDate, error });
+              }
+            } catch (tssError) {
+              console.error('Error processing TSS record:', { workoutKey, tss, error: tssError });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error in persistData function:', error);
       }
     };
 
@@ -208,6 +234,7 @@ function App() {
   };
 
   const handleFitnessInitialize = (fitness: number, fatigue: number, raceDate: Date) => {
+    console.log('Initializing fitness settings:', { fitness, fatigue, raceDate });
     setInitialFitness(fitness);
     setInitialFatigue(fatigue);
     
@@ -218,15 +245,26 @@ function App() {
     startDate.setDate(startDate.getDate() - diffToMonday - (totalWeeks - 1) * 7);
     startDate.setHours(0, 0, 0, 0);
 
+    console.log('Calculated plan start date:', startDate);
     setPlanStartDate(startDate);
     setFitnessInitialized(true);
+    
     if (session) {
+      console.log('User is logged in, immediately persisting fitness settings');
       upsertFitnessSettings(
         session.user.id,
         fitness,
         fatigue,
         startDate.toISOString().split('T')[0]
-      );
+      ).then(({ error }) => {
+        if (error) {
+          console.error('Failed to immediately persist fitness settings:', error);
+        } else {
+          console.log('Successfully immediately persisted fitness settings');
+        }
+      });
+    } else {
+      console.log('User not logged in, fitness settings will be persisted when they log in');
     }
   };
 
